@@ -1,0 +1,155 @@
+** sch_path: /workspace/design/blocks/input/schematic/EN_INPUT_tb.sch
+**.subckt EN_INPUT_tb
+x1 N_POR CLK SYNC EN EDGE EN_INPUT
+V_VDD VDD GND 1.2
+V_CLK CLK GND PULSE(0 1.2 50u 1n 1n 50u 100u)
+V_N_POR N_POR GND PWL(0 0 20u 0 20.01u 1.2)
+V_EN EN GND PULSE(0 1.2 225u 1n 1n 500u 1m)
+V_VSS VSS GND 0
+**** begin user architecture code
+
+.global VDD VSS
+.lib cornerMOSlv.lib mos_tt
+* Standard cells expanded from the PDK schematics by Xschem.
+.temp 27
+.control
+save v(CLK) v(EN) v(N_POR) v(SYNC) v(EDGE) v(VDD) i(V_VDD)
+tran 100n 2m 0 1u
+meas tran edge_width TRIG v(EDGE) VAL=0.6 RISE=1 TARG v(EDGE) VAL=0.6 FALL=1
+meas tran sync_rise WHEN v(SYNC)=0.6 RISE=1
+meas tran edge_rise WHEN v(EDGE)=0.6 RISE=1
+meas tran edge_second WHEN v(EDGE)=0.6 RISE=2
+meas tran edge_held_high FIND v(EDGE) AT=800u
+meas tran edge_after_fall FIND v(EDGE) AT=1.5m
+write EN_INPUT_tb.raw
+wrdata EN_INPUT_tb_signals.txt v(CLK) v(EN) v(N_POR) v(SYNC) v(EDGE)
+.endc
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  EN_INPUT.sym # of pins=5
+** sym_path: /workspace/design/blocks/input/schematic/EN_INPUT.sym
+** sch_path: /workspace/design/blocks/input/schematic/EN_INPUT.sch
+.subckt EN_INPUT N_POR CLK SYNC EN EDGE
+*.opin EDGE
+*.opin SYNC
+*.ipin EN
+*.ipin N_POR
+*.ipin CLK
+x1 net1 CLK EN N_POR VDD VSS sg13g2_dfrbpq_2
+x2 SYNC CLK net1 N_POR VDD VSS sg13g2_dfrbpq_2
+x4 EDGE net2 SYNC VDD VSS sg13g2_and2_2
+x3 net3 net2 CLK SYNC N_POR VDD VSS sg13g2_dfrbp_2
+.ends
+
+
+* expanding   symbol:  sg13g2_dfrbpq_2.sym # of pins=4
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_dfrbpq_2.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_dfrbpq_2.sch
+.subckt sg13g2_dfrbpq_2 Q CLK D RESET_B VDD VSS
+
+*.opin Q
+*.ipin CLK
+*.ipin D
+*.ipin RESET_B
+XM1 Db D net12 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 net12 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net2 clkneg net11 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM4 net11 net3 VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM5 net3 net2 net7 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM6 net7 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM7 net1 net2 VSS VSS sg13_lv_nmos w=640.00n l=130.00n ng=1 m=1 mm_ok=1
+XM8 Q net1 VSS VSS sg13_lv_nmos w=1.48u l=130.00n ng=2 m=1 mm_ok=1
+XM9 clkneg CLK VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM10 clkpos clkneg VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM11 Db clkneg net4 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM12 net4 clkpos net10 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM13 net10 net5 net6 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM14 net6 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM15 net5 net4 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM16 net5 clkpos net2 VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM17 Db RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM18 Db D VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM19 net9 net3 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM20 net2 clkpos net9 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM21 net3 net2 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM22 net3 RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM23 net1 net2 VDD VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+XM24 Q net1 VDD VDD sg13_lv_pmos w=2.24u l=130.00n ng=2 m=1 mm_ok=1
+XM25 clkneg CLK VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM26 clkpos clkneg VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM27 Db clkpos net4 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM28 net8 net5 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM29 net4 clkneg net8 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM30 net4 RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM31 net5 net4 VDD VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+XM32 net5 clkneg net2 VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_and2_2.sym # of pins=3
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_and2_2.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_and2_2.sch
+.subckt sg13g2_and2_2 X A B VDD VSS
+
+*.ipin A
+*.ipin B
+*.opin X
+XM1 net1 A net2 VSS sg13_lv_nmos w=640.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 net2 B VSS VSS sg13_lv_nmos w=640.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 X net1 VSS VSS sg13_lv_nmos w=1.48u l=130.00n ng=2 m=1 mm_ok=1
+XM4 net1 B VDD VDD sg13_lv_pmos w=840.00n l=130.00n ng=1 m=1 mm_ok=1
+XM5 net1 A VDD VDD sg13_lv_pmos w=840.00n l=130.00n ng=1 m=1 mm_ok=1
+XM6 X net1 VDD VDD sg13_lv_pmos w=2.24u l=130.00n ng=2 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_dfrbp_2.sym # of pins=5
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_dfrbp_2.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_dfrbp_2.sch
+.subckt sg13g2_dfrbp_2 Q Q_N CLK D RESET_B VDD VSS
+
+*.ipin D
+*.ipin RESET_B
+*.ipin CLK
+*.opin Q
+*.opin Q_N
+XM1 Db D net12 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 net12 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net2 clkneg net11 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM4 net11 net3 VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM5 net3 net2 net7 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM6 net7 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM7 Q_N net2 VSS VSS sg13_lv_nmos w=1.48u l=130.00n ng=2 m=1 mm_ok=1
+XM8 net1 net2 VSS VSS sg13_lv_nmos w=640.00n l=130.00n ng=1 m=1 mm_ok=1
+XM9 Q net1 VSS VSS sg13_lv_nmos w=1.48u l=130.00n ng=2 m=1 mm_ok=1
+XM10 clkneg CLK VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM11 clkpos clkneg VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM12 Db clkneg net4 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM13 net4 clkpos net10 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM14 net10 net5 net6 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM15 net6 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM16 net5 net4 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM17 net5 clkpos net2 VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM18 Db RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM19 Db D VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM20 net9 net3 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM21 net2 clkpos net9 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM22 net3 net2 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM23 net3 RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM24 Q_N net2 VDD VDD sg13_lv_pmos w=2.24u l=130.00n ng=2 m=1 mm_ok=1
+XM25 net1 net2 VDD VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+XM26 Q net1 VDD VDD sg13_lv_pmos w=2.24u l=130.00n ng=2 m=1 mm_ok=1
+XM27 clkneg CLK VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM28 clkpos clkneg VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM29 Db clkpos net4 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM30 net8 net5 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM31 net4 clkneg net8 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM32 net4 RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM33 net5 net4 VDD VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+XM34 net5 clkneg net2 VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+.GLOBAL GND
+.end
