@@ -39,6 +39,10 @@ try:
     tcl = out / 'check_xschem.tcl'
     tcl.write_text('''
 if {![info exists THESIS_ROOT]} {error "Project xschemrc not loaded"}
+if {$XSCHEM_START_WINDOW ne "$env(PDKPATH)/libs.tech/xschem/start_page.sch"} {
+    error "IHP welcome page is not configured"
+}
+if {![file exists $XSCHEM_START_WINDOW]} {error "Missing IHP welcome page"}
 foreach sym {sg13g2_pr/sg13_lv_nmos.sym sg13g2_pr/sg13_lv_pmos.sym} {
     set found 0
     foreach dir [split $XSCHEM_LIBRARY_PATH :] {

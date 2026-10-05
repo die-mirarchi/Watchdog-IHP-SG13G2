@@ -32,7 +32,7 @@ puede tardar; en esta PC reutiliza la imagen que ya estaba descargada.
 ## Uso diario
 
 ```bash
-bash scripts/eda.sh xschem   # esquemÃ¡ticos; abre vacÃ­o
+bash scripts/eda.sh xschem   # esquemáticos; abre la portada de IHP
 bash scripts/eda.sh klayout  # layouts; abre vacÃ­o
 bash scripts/eda.sh shell    # terminal con herramientas y PDK configurados
 bash scripts/eda.sh check    # diagnÃ³stico de instalaciÃ³n
@@ -67,7 +67,7 @@ de simulaciÃ³n y extracciÃ³n en `build/` o `results/`.
 ## Lanzador de Windows
 
 Para esta instalación, abrir con doble clic
-`scripts/windows/Iniciar-Watchdog.bat` (también se puede copiar al escritorio).
+`scripts/windows/Iniciar-Watchdog.bat` (se puede copiar al escritorio).
 Usa la distribución WSL predeterminada y el usuario `eamtastudent`; el proyecto
 se ubica en `/home/eamtastudent/tesis/Watchdog-IHP-SG13G2`. En otra PC, revisar
 la distribución predeterminada con `wsl --list --verbose` y adaptar las variables
@@ -76,11 +76,16 @@ la distribución predeterminada con `wsl --list --verbose` y adaptar las variable
 El lanzador abre la terminal del contenedor en `/workspace`. Desde allí:
 
 ```bash
-xschem /foss/pdks/ihp-sg13g2/libs.tech/xschem/start_page.sch &
+xschem &
 klayout -e &
 ```
 
-El primer comando abre la portada de IHP. `xschem &` abre una hoja nueva vacía.
+`xschem &` abre directamente la portada de IHP. Desde Xschem se puede crear
+una hoja nueva para empezar un diseño. La terminal muestra usuario, equipo y
+carpeta actual (por ejemplo `eamtastudent@Dieguito:/workspace$`), con colores,
+historial y autocompletado. La configuración del proyecto se conserva aunque
+se ejecute `xschem` desde una subcarpeta.
+
 Para comprobar el arranque sin abrir una sesión interactiva, ejecutar el BAT
 con el argumento `--check` desde PowerShell o CMD.
 

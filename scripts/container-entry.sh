@@ -24,6 +24,6 @@ case "$action" in
         exec xschem --rcfile /workspace/xschemrc "$@" ;;
     klayout) [[ -n ${DISPLAY:-} ]] || { echo 'No hay DISPLAY. Abrir desde WSLg o una sesión gráfica Linux.' >&2; exit 1; }
         exec klayout -e -nn "$PDKPATH/libs.tech/klayout/tech/sg13g2.lyt" "$@" ;;
-    shell) exec bash --noprofile --norc "$@" ;;
+    shell) exec bash --noprofile --rcfile /workspace/tools-config/bashrc "$@" ;;
     *) exec "$action" "$@" ;;
 esac

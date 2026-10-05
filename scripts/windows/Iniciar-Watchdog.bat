@@ -19,7 +19,7 @@ echo Se usa la distribucion WSL predeterminada.
 echo Proyecto: %STARTDIR%
 echo.
 echo Dentro del contenedor, para abrir la pagina inicial de IHP:
-echo   xschem /foss/pdks/ihp-sg13g2/libs.tech/xschem/start_page.sch ^&
+echo   xschem ^&
 echo.
 echo Para abrir KLayout:
 echo   klayout -e ^&

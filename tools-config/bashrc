@@ -1,0 +1,16 @@
+# Interactive thesis shell: familiar prompt, project-local history and settings.
+case $- in *i*) ;; *) return ;; esac
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+HISTCONTROL=ignoreboth
+HISTSIZE=5000
+HISTFILESIZE=10000
+HISTFILE="$HOME/.bash_history"
+shopt -s histappend checkwinsize
+alias ls='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+if [[ -f /usr/share/bash-completion/bash_completion ]]; then
+    source /usr/share/bash-completion/bash_completion
+fi
+# Preserve the project configuration even when launching from a block folder.
+xschem() { command xschem --rcfile /workspace/xschemrc "$@"; }
