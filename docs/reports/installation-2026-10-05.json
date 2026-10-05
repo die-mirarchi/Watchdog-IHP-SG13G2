@@ -1,0 +1,28 @@
+{
+  "timestamp_utc": "2026-10-05T20:49:19.122826+00:00",
+  "image": "docker.io/hpretl/iic-osic-tools@sha256:b87b3f1af9ba72d9486466ea777cf4248e96e20d9dba76d67259bc185db3859c",
+  "checks": {
+    "executables": "PASS",
+    "xschem_ihp_symbols": "PASS",
+    "ngspice_ihp_osdi": "PASS",
+    "klayout_ihp_technology_pcells": "PASS",
+    "drc_lvs_decks_present": "PASS (not run: no layout exists)"
+  },
+  "scope": "Installation only; no watchdog validation, DRC or LVS signoff.",
+  "pdk_commit": "c271a7e97a7bab201c1d0a399215969d2ee19573",
+  "xschem": [
+    "XSCHEM V3.4.8RC",
+    "Copyright (C) 1998-2026 Stefan Schippers",
+    ""
+  ],
+  "ngspice": [
+    "******",
+    "** ngspice-47 : Circuit level simulation program",
+    "** Compiled with KLU Direct Linear Solver"
+  ],
+  "klayout": [
+    "KLayout 0.30.12"
+  ],
+  "nmos_smoke_current_A": 0.0004005261,
+  "status": "PASS"
+}

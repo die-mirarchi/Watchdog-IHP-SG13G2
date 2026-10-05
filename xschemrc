@@ -3,6 +3,7 @@ set THESIS_ROOT [file dirname [file normalize [info script]]]
 set PDK_ROOT $env(PDK_ROOT)
 set PDK $env(PDK)
 source $PDK_ROOT/$PDK/libs.tech/xschem/xschemrc
+set XSCHEM_START_WINDOW {}
 set netlist_dir $THESIS_ROOT/build/netlist
 file mkdir $netlist_dir
 append XSCHEM_LIBRARY_PATH :$THESIS_ROOT/design/top/schematic

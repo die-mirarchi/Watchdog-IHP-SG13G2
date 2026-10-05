@@ -87,12 +87,16 @@ t.load('/foss/pdks/ihp-sg13g2/libs.tech/klayout/tech/sg13g2.lyt')
 assert t.name
 import sg13g2_pycell_lib
 libraries = pya.Library.library_names()
-assert any('sg13' in x.lower() for x in libraries), libraries
-Path('/workspace/build/environment-check/klayout.ok').write_text(str(libraries))
+assert 'SG13_dev' in libraries, libraries
+lib = next(pya.Library.library_by_id(i) for i in pya.Library.library_ids()
+           if pya.Library.library_by_id(i).name() == 'SG13_dev')
+pcells = lib.layout().pcell_names()
+assert len(pcells) >= 10, pcells
+Path('/workspace/build/environment-check/klayout.ok').write_text(str(libraries) + '\\n' + str(pcells))
 ''')
     marker = out / 'klayout.ok'
     marker.unlink(missing_ok=True)
-    run('klayout', ['klayout', '-b', '-r', str(macro)], env={**os.environ, 'QT_QPA_PLATFORM': 'offscreen'})
+    run('klayout', ['klayout', '-zz', '-r', str(macro)], env={**os.environ, 'QT_QPA_PLATFORM': 'offscreen'})
     assert marker.is_file(), 'KLayout technology/PCells check did not finish'
     report['checks']['klayout_ihp_technology_pcells'] = 'PASS'
     for rel in ('libs.tech/klayout/tech/drc/ihp-sg13g2.drc', 'libs.tech/klayout/tech/lvs/sg13g2.lvs'):
