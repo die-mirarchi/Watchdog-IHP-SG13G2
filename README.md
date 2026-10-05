@@ -1,87 +1,92 @@
-# EAMTA2026-VLSI
-Repository containing the "Introduction to Very Large Scale Integration Design" course from the 2026 Argentine School for Micro-nano Electronics, Technology and Applications
+# Watchdog IHP SG13G2
 
-## Getting Started
+Base limpia para desarrollar una tesis de watchdog para microcontrolador en IHP
+SG13G2. Derivada de [EAMTA2026-VLSI](https://github.com/Fundacion-Fulgor/EAMTA2026-VLSI),
+conservando historial y licencia. Repositorio de tesis independiente del fork del curso.
 
-See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) for setup instructions.
+**Estado inicial:** entorno preparado; diseño pendiente. Las carpetas de
+esquemáticos y layouts están vacías. Ver [alcance](docs/ALCANCE.md).
 
-See [docs/STUDENT_WORKFLOW.md](docs/STUDENT_WORKFLOW.md) for the development workflow.
+## Instalar en otra PC
 
-See [docs/DESIGN_SPECIFICATIONS.md](docs/DESIGN_SPECIFICATIONS.md) for detailed design specifications.
+Windows: instalar WSL2 y Ubuntu 24.04 (`wsl --install -d Ubuntu-24.04` desde
+PowerShell con permisos adecuados; reiniciar si Windows lo pide). Luego abrir
+Ubuntu. Linux: usar Ubuntu 24.04 x86_64. Para ventanas gráficas se requiere WSLg
+o una sesión X11/XWayland. Reservar al menos 30 GB de disco para herramientas.
 
-### Updating the Tool Container
-
-On Windows, run the following command in PowerShell:
-
-```powershell
-wsl -d Ubuntu -- bash -lc 'podman pull docker.io/hpretl/iic-osic-tools:latest && distrobox stop iic-osic-tools2 || true; distrobox rm -f iic-osic-tools2 && distrobox create -n iic-osic-tools2 -i docker.io/hpretl/iic-osic-tools:latest --yes'
-```
-
-On Linux, run:
+Desde Ubuntu, **fuera de cualquier contenedor Distrobox**:
 
 ```bash
-podman pull docker.io/hpretl/iic-osic-tools:latest && distrobox stop iic-osic-tools2 || true; distrobox rm -f iic-osic-tools2 && distrobox create -n iic-osic-tools2 -i docker.io/hpretl/iic-osic-tools:latest --yes
+sudo apt-get update && sudo apt-get install -y git
+mkdir -p ~/tesis
+cd ~/tesis
+git clone https://github.com/die-mirarchi/Watchdog-IHP-SG13G2.git
+cd Watchdog-IHP-SG13G2
+bash setup.sh
 ```
 
-## Course Project: 4-bit Counter Design
+El instalador instala Podman si falta, descarga la imagen fija si hace falta y
+ejecuta las pruebas de instalación. No requiere submódulos. El primer download
+puede tardar; en esta PC reutiliza la imagen que ya estaba descargada.
 
-This repository contains the design and verification flow for a 4-bit counter implemented in the IHP SG13G2 130nm PDK. The project is structured to allow multiple student groups to work collaboratively on different blocks of the counter.
+## Uso diario
 
-### Toolchain
-
-- **Container**: hpretl/iic-osic-tools (via podman & distrobox)
-- **Schematics**: xschem
-- **Simulation**: ngspice
-- **Characterization**: CACE
-- **Layout**: KLayout
-- **PDK**: IHP SG13G2 130nm
-
-### Project Structure
-
-```
-.
-├── design/              # Design files
-│   ├── blocks/         # Individual counter blocks (assigned to student groups)
-│   └── top/            # Top-level counter integration
-├── verification/        # Verification and testbenches
-│   ├── testbenches/    # ngspice testbenches
-│   └── vectors/        # Test vectors
-├── scripts/            # Automation and flow scripts
-├── tools-config/       # Tool configuration files
-├── examples/           # Example implementations and tutorials
-└── docs/               # Documentation and guidelines
-
+```bash
+bash scripts/eda.sh xschem   # esquemáticos; abre vacío
+bash scripts/eda.sh klayout  # layouts; abre vacío
+bash scripts/eda.sh shell    # terminal con herramientas y PDK configurados
+bash scripts/eda.sh check    # diagnóstico de instalación
 ```
 
-### 4-bit Counter Architecture
+En Windows con una Ubuntu que entra automáticamente a Distrobox, abrir el entorno
+correcto desde PowerShell:
 
-The 4-bit counter consists of the following blocks:
+```powershell
+wsl -d Ubuntu-24.04 -u eamtastudent --cd /home/eamtastudent/tesis/Watchdog-IHP-SG13G2 -- bash --noprofile --norc
+```
 
-1. **D Flip-Flop (DFF)** - Basic storage element
-2. **XOR Gate** - Toggle logic
-3. **AND Gate** - Ripple carry logic
-4. **Counter Stage** - Single bit counter stage
-5. **Top-Level Counter** - 4-bit counter integration
+En otra PC adaptar usuario y ruta. Dentro del contenedor el proyecto se encuentra
+en `/workspace`. Guardar fuentes en `design/` o `verification/`; guardar archivos
+de simulación y extracción en `build/` o `results/`.
 
-Each student group will be assigned one or more blocks to design, simulate, characterize, and layout.
+## Organización
 
-### Group Assignments
+| Carpeta | Contenido |
+|---|---|
+| `design/blocks/` | input, oscillator, bias, comparator, por, digital, output |
+| `design/top/` | Integración futura; schematic, layout, char |
+| `verification/` | Bancos, vectores y planes de verificación futuros |
+| `docs/thesis/` | Capítulos, figuras y referencias de la tesis |
+| `docs/decisions/` | Decisiones de diseño |
+| `docs/reports/` | Informes seleccionados para versionar |
+| `tools-config/` | Versiones fijas del entorno |
+| `scripts/` | Lanzador y comprobación de instalación |
+| `build/`, `results/` | Resultados locales generados; excluidos de Git |
+| `.local/` | Preferencias y cachés locales; excluidas de Git |
 
-Student groups will be assigned blocks through GitHub Issues. See [docs/GROUP_ASSIGNMENTS.md](docs/GROUP_ASSIGNMENTS.md) for details.
+## Guardar y continuar en otra PC
 
-### Contributing
+Ejecutar Git desde Ubuntu, fuera del contenedor. Antes de cada commit revisar
+`git status` y `git diff`. Agregar sólo fuentes y resultados seleccionados.
 
-Please follow the workflow described in [docs/STUDENT_WORKFLOW.md](docs/STUDENT_WORKFLOW.md). Each group should:
+```bash
+git add design verification docs
+git commit -m "Describe el avance realizado"
+git push
+```
 
-1. Work in their assigned block directory
-2. Create feature branches for their work
-3. Submit pull requests for review
-4. Ensure their design passes verification before submitting
+El clone HTTPS es público; para subir cambios configurar autenticación propia en
+cada PC. Se puede usar SSH con `git remote set-url origin
+git@github.com:die-mirarchi/Watchdog-IHP-SG13G2.git`. No copiar claves al repositorio.
+En otra PC: clonar, ejecutar `bash setup.sh` y luego `git pull --ff-only` para
+actualizar una copia existente. Los cambios sin commit/push no viajan con Git.
 
-### Resources
+## Qué verifica el diagnóstico
 
-- [IHP SG13G2 PDK Documentation](https://github.com/IHP-GmbH/IHP-Open-PDK)
-- [xschem Documentation](https://xschem.sourceforge.io/stefan/index.html)
-- [ngspice User Manual](http://ngspice.sourceforge.net/docs.html)
-- [CACE Documentation](https://github.com/efabless/cace)
-- [KLayout Documentation](https://www.klayout.de/doc.html)
+Imagen y PDK fijados; carga de símbolos IHP en Xschem; punto de operación de un
+NMOS IHP con ngspice y OSDI; tecnología y PCells IHP en KLayout; presencia de
+reglas DRC/LVS y herramientas adicionales. Resultado en
+`build/environment-check/report.json`, logs junto al informe.
+No ejecuta DRC/LVS sobre un chip ni valida el watchdog: todavía no hay diseño.
+
+Ver [procedencia](docs/PROVENANCE.md) y [solución de problemas](docs/TROUBLESHOOTING.md).

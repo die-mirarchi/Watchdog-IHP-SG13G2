@@ -1,89 +1,22 @@
-# Git ignore file for VLSI project
-
-# Simulation outputs
-*.raw
-*.log
-*.out
-*.print
-*.err
-
-# ngspice outputs
-*.lis
-*.txt
-*.mt0
-*.ic0
-*.pa0
-
-# xschem temporary files
-*.bak
-*.backup
-*~
-.xschem/
-xschemrc_backup
-
-# KLayout temporary files
-*.lym
-*.lyp.bak
-*.lyrdb
-
-# CACE outputs
-*.run/
-cace_summary.txt
-simulation/
-
-# Magic VLSI temporary/extraction files
-*.ext
-*.sim
-*.nodes
-
-# Python
+/.local/
+/build/
+/results/
 __pycache__/
-*.py[cod]
-*$py.class
-.Python
-*.so
-.env
-.venv
-venv/
-
-# Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Build artifacts
-build/
-dist/
-*.egg-info/
-
-# Temporary directories
-tmp/
-temp/
-.tmp/
-
-# Logs
-logs/
+*.pyc
 *.log
-
-# OS files
+*.raw
+*.vcd
+*.fst
+*.lxt
+*.bak
+*~
+*.swp
+*.sch.bak
+*.gds.bak
+**/backups/
 .DS_Store
 Thumbs.db
-
-# Large binary files (unless specifically needed)
-*.gds.gz
-*.oas
-
-# Backup files
-*.bak
-*.backup
-*.old
-
-# Documentation build
-docs/_build/
-site/
-
-# Keep directory structure but ignore empty dirs
-!.gitkeep
+*:Zone.Identifier
+.env
+.env.*
+!.env.example

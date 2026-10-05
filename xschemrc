@@ -1,65 +1,13 @@
-#### xschemrc configuration file for DelayLine project
-#### This file configures xschem to use the IHP-Open-PDK submodule
-
-###########################################################################
-#### XSCHEM LIBRARY PATH CONFIGURATION
-###########################################################################
-#### Get the project root directory
-set SCRIPT_DIR [file dirname [file normalize [info script]]]
-set LOCAL_PDK_ROOT $SCRIPT_DIR/IHP-Open-PDK
-
-#### Prefer externally provided PDK vars (e.g. distrobox /foss/pdks),
-#### then fallback to the local IHP-Open-PDK submodule.
-if {[info exists env(PDK)] && $env(PDK) ne {}} {
-    set PDK $env(PDK)
-} else {
-    set PDK ihp-sg13g2
-    set env(PDK) $PDK
-}
-
-if {[info exists env(PDK_ROOT)] && $env(PDK_ROOT) ne {} && \
-    [file exists $env(PDK_ROOT)/$PDK/libs.tech/xschem/xschemrc]} {
-    set PDK_ROOT $env(PDK_ROOT)
-} elseif {[file exists $LOCAL_PDK_ROOT/$PDK/libs.tech/xschem/xschemrc]} {
-    set PDK_ROOT $LOCAL_PDK_ROOT
-    set env(PDK_ROOT) $PDK_ROOT
-} else {
-    puts "ERROR: Could not find IHP-Open-PDK for PDK '$PDK'."
-    puts "Checked env(PDK_ROOT) and local submodule at $LOCAL_PDK_ROOT"
-    puts "If using iic-osic-tools2, ensure: export PDK_ROOT=/foss/pdks"
-    exit 1
-}
-
-#### Keep local Tcl vars for our own use below (optional but convenient)
-set env(PDK_ROOT) $PDK_ROOT
-set env(PDK) $PDK
-
-#### Check if submodule is initialized
-if {![file exists $PDK_ROOT/$PDK/libs.tech/xschem/xschemrc]} {
-    puts "ERROR: IHP-Open-PDK submodule not initialized."
-    puts "Please run: git submodule update --init"
-    exit 1
-}
-
-#### Source the base PDK xschemrc configuration
+# Project configuration; no dependency on personal ~/.xschem settings.
+set THESIS_ROOT [file dirname [file normalize [info script]]]
+set PDK_ROOT $env(PDK_ROOT)
+set PDK $env(PDK)
 source $PDK_ROOT/$PDK/libs.tech/xschem/xschemrc
-
-#### NOTE: sg13g2_io is already appended by the PDK's xschemrc, 
-#### so we don't need to add it again.
-
-#### Add other library paths that might not be in the default PDK setup
-#### (Double check if these are needed; stdcell and pr are usually handled 
-#### by the PDK script, but appending them here explicitly is safe).
-append XSCHEM_LIBRARY_PATH :$PDK_ROOT/$PDK/libs.ref/sg13g2_pr/xschem
-append XSCHEM_LIBRARY_PATH :$PDK_ROOT/$PDK/libs.ref/sg13g2_stdcell/xschem
-# The line below is often redundant if the PDK is set up correctly, but harmless
-append XSCHEM_LIBRARY_PATH :$PDK_ROOT/$PDK/libs.tech/xschem/sg13g2_pr
-
-###########################################################################
-#### NETLIST DIRECTORY
-###########################################################################
-#### Set netlist directory relative to project
-set netlist_dir $SCRIPT_DIR/netlist
-
-#### Add project-specific xschem directories
-append XSCHEM_LIBRARY_PATH :$SCRIPT_DIR/design
+set netlist_dir $THESIS_ROOT/build/netlist
+file mkdir $netlist_dir
+append XSCHEM_LIBRARY_PATH :$THESIS_ROOT/design/top/schematic
+foreach block [glob -nocomplain -types d $THESIS_ROOT/design/blocks/*] {
+    append XSCHEM_LIBRARY_PATH :$block/schematic
+}
+append XSCHEM_LIBRARY_PATH :$THESIS_ROOT/verification/testbenches
+set INITIALINSTDIR $THESIS_ROOT/design

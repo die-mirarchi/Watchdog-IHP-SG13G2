@@ -1,0 +1,21 @@
+name: Repository checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  structure:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell and Python syntax
+        run: |
+          bash -n setup.sh scripts/eda.sh scripts/container-entry.sh
+          python3 -m py_compile scripts/check_environment.py
+      - name: Check immutable environment lock
+        run: |
+          source tools-config/toolchain.lock
+          [[ "$OSIC_IMAGE" =~ @sha256:[0-9a-f]{64}$ ]]
+          [[ "$IHP_PDK_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test -f LICENSE
+          test -d design/top/schematic
+          test -d design/top/layout

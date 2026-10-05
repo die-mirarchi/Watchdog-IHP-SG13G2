@@ -1,0 +1,4 @@
+# Immutable Linux amd64 image, already tested on Ubuntu 24.04 / WSL2.
+OSIC_IMAGE=docker.io/hpretl/iic-osic-tools@sha256:b87b3f1af9ba72d9486466ea777cf4248e96e20d9dba76d67259bc185db3859c
+IHP_PDK_COMMIT=c271a7e97a7bab201c1d0a399215969d2ee19573
+UPSTREAM_COMMIT=3d20771853ef9864352e6ba6aa8a691b461cf341
