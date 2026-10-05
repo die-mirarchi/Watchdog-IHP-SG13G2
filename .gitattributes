@@ -9,3 +9,4 @@
 *.spice text eol=lf
 *.gds binary
 *.oas binary
+*.bat text eol=crlf

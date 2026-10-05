@@ -64,6 +64,26 @@ de simulaciÃ³n y extracciÃ³n en `build/` o `results/`.
 | `build/`, `results/` | Resultados locales generados; excluidos de Git |
 | `.local/` | Preferencias y cachÃ©s locales; excluidas de Git |
 
+## Lanzador de Windows
+
+Para esta instalación, abrir con doble clic
+`scripts/windows/Iniciar-Watchdog.bat` (también se puede copiar al escritorio).
+Usa la distribución WSL predeterminada y el usuario `eamtastudent`; el proyecto
+se ubica en `/home/eamtastudent/tesis/Watchdog-IHP-SG13G2`. En otra PC, revisar
+la distribución predeterminada con `wsl --list --verbose` y adaptar las variables
+`LINUX_USER` y `STARTDIR` del BAT si son diferentes.
+
+El lanzador abre la terminal del contenedor en `/workspace`. Desde allí:
+
+```bash
+xschem /foss/pdks/ihp-sg13g2/libs.tech/xschem/start_page.sch &
+klayout -e &
+```
+
+El primer comando abre la portada de IHP. `xschem &` abre una hoja nueva vacía.
+Para comprobar el arranque sin abrir una sesión interactiva, ejecutar el BAT
+con el argumento `--check` desde PowerShell o CMD.
+
 ## Guardar y continuar en otra PC
 
 Ejecutar Git desde Ubuntu, fuera del contenedor. Antes de cada commit revisar
