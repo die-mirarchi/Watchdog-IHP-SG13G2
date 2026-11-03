@@ -6,9 +6,15 @@ source "$ROOT/tools-config/toolchain.lock"
 command -v podman >/dev/null || { echo 'Ejecutar bash setup.sh primero.' >&2; exit 1; }
 podman image exists "$OSIC_IMAGE" || { echo 'Falta la imagen. Ejecutar bash setup.sh.' >&2; exit 1; }
 mkdir -p "$ROOT/.local/home" "$ROOT/build" "$ROOT/results"
-args=(run --rm --init --hostname "$(hostname)" --userns=keep-id --user "$(id -u):$(id -g)"
+PDK_SOURCE="$ROOT/.local/pdks/IHP-Open-PDK"
+[[ -d "$PDK_SOURCE/ihp-sg13g2" ]] || { echo 'Falta el PDK local. Ejecutar bash setup.sh.' >&2; exit 1; }
+[[ $(git -C "$PDK_SOURCE" rev-parse HEAD) == "$IHP_PDK_COMMIT" ]] || { echo 'Version del PDK distinta del lock. Ejecutar bash setup.sh.' >&2; exit 1; }
+pdk_mode=ro
+[[ ${1:-shell} == prepare-pdk ]] && pdk_mode=rw
+args=(run --pull=never --rm --init --hostname "$(hostname)" --userns=keep-id --user "$(id -u):$(id -g)"
     --security-opt=no-new-privileges --cap-drop=all
-    --volume "$ROOT:/workspace:rw" --workdir /workspace
+    --volume "$ROOT:/workspace:rw"
+    --volume "$PDK_SOURCE/ihp-sg13g2:/foss/pdks/ihp-sg13g2:$pdk_mode" --workdir /workspace
     --env HOME=/workspace/.local/home --env PDK=ihp-sg13g2
     --env PDK_ROOT=/foss/pdks --env THESIS_IMAGE="$OSIC_IMAGE"
     --entrypoint /bin/bash)

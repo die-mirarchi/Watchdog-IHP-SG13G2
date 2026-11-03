@@ -16,5 +16,6 @@ source tools-config/toolchain.lock
 if ! podman image exists "$OSIC_IMAGE"; then
     podman pull "$OSIC_IMAGE"
 fi
+bash scripts/prepare-pdk.sh
 bash scripts/eda.sh check
 echo 'Instalación lista. Abrir con: bash scripts/eda.sh xschem / klayout / shell'

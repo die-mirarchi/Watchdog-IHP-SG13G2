@@ -1,0 +1,48 @@
+** sch_path: /workspace/design/blocks/bias/schematic/bias_tb.sch
+**.subckt bias_tb
+x1 VBP VBN VDD VSS bias
+V_VDD VDD GND 1.2
+V_VSS VSS GND 0
+**** begin user architecture code
+
+
+
+.lib cornerMOSlv.lib mos_tt
+.lib cornerMOShv.lib mos_tt
+.lib cornerHBT.lib hbt_typ
+.lib cornerRES.lib res_typ
+.lib cornerDIO.lib dio_tt
+.lib cornerCAP.lib cap_typ
+
+
+
+
+
+.temp 27
+.control
+save all
+op
+print v(VDD) v(VSS) v(VBN) v(VBP)
+write bias_tb.raw
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  bias.sym # of pins=2
+** sym_path: /workspace/design/blocks/bias/schematic/bias.sym
+** sch_path: /workspace/design/blocks/bias/schematic/bias.sch
+.subckt bias VBP VBN VDD VSS
+*.opin VBP
+*.opin VBN
+XM1 VBN VBN VSS VSS sg13_lv_nmos w=2u l=1u ng=1 m=1 mm_ok=1
+XM2 VBP VBP VDD VDD sg13_lv_pmos w=2u l=1u ng=1 m=1 mm_ok=1
+XR2 VBP VSS sub! rhigh w=0.5e-6 l=10.0e-6 m=1 b=0 mm_ok=1
+XR1 VDD VBN sub! rhigh w=0.5e-6 l=10.0e-6 m=1 b=0 mm_ok=1
+XC1 VBN VSS cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+XC2 VDD VBP cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+.ends
+
+.GLOBAL GND
+.end

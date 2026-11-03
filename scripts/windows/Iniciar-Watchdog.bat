@@ -3,6 +3,7 @@ setlocal
 
 set "WSL_EXE=%SystemRoot%\System32\wsl.exe"
 if exist "%SystemRoot%\Sysnative\wsl.exe" set "WSL_EXE=%SystemRoot%\Sysnative\wsl.exe"
+set "WSL_DISTRO=Ubuntu-24.04"
 set "LINUX_USER=eamtastudent"
 set "STARTDIR=/home/eamtastudent/tesis/Watchdog-IHP-SG13G2"
 set "ACTION=shell"
@@ -15,7 +16,7 @@ if not exist "%WSL_EXE%" (
 )
 
 echo Iniciando entorno de tesis Watchdog IHP SG13G2...
-echo Se usa la distribucion WSL predeterminada.
+echo Distribucion WSL: %WSL_DISTRO%
 echo Proyecto: %STARTDIR%
 echo.
 echo Dentro del contenedor, para abrir la pagina inicial de IHP:
@@ -25,7 +26,7 @@ echo Para abrir KLayout:
 echo   klayout -e ^&
 echo.
 
-"%WSL_EXE%" -u %LINUX_USER% --cd %STARTDIR% -- bash scripts/eda.sh %ACTION%
+"%WSL_EXE%" -d %WSL_DISTRO% -u %LINUX_USER% --cd %STARTDIR% -- bash scripts/eda.sh %ACTION%
 set "RESULT=%ERRORLEVEL%"
 
 if /i "%~1"=="--check" exit /b %RESULT%

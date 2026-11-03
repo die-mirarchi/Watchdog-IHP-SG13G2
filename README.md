@@ -26,13 +26,13 @@ bash setup.sh
 ```
 
 El instalador instala Podman si falta, descarga la imagen fija si hace falta y
-ejecuta las pruebas de instalación. No requiere submódulos. El primer download
+ejecuta las pruebas de instalación. El PDK se descarga en `.local/pdks/IHP-Open-PDK`, con sus submódulos, y sus seis modelos Verilog-A se compilan con OpenVAF. El primer download
 puede tardar; en esta PC reutiliza la imagen que ya estaba descargada.
 
 ## Uso diario
 
 ```bash
-bash scripts/eda.sh xschem   # esquem�ticos; abre la portada de IHP
+bash scripts/eda.sh xschem   # esquem�ticos; abre la portada de IHP
 bash scripts/eda.sh klayout  # layouts; abre vacío
 bash scripts/eda.sh shell    # terminal con herramientas y PDK configurados
 bash scripts/eda.sh check    # diagnóstico de instalación
@@ -66,14 +66,14 @@ de simulación y extracción en `build/` o `results/`.
 
 ## Lanzador de Windows
 
-Para esta instalaci�n, abrir con doble clic
+Para esta instalaci�n, abrir con doble clic
 `scripts/windows/Iniciar-Watchdog.bat` (se puede copiar al escritorio).
-Usa la distribuci�n WSL predeterminada y el usuario `eamtastudent`; el proyecto
+Usa la distribución WSL Ubuntu-24.04 y el usuario `eamtastudent`; el proyecto
 se ubica en `/home/eamtastudent/tesis/Watchdog-IHP-SG13G2`. En otra PC, revisar
-la distribuci�n predeterminada con `wsl --list --verbose` y adaptar las variables
+la distribuci�n predeterminada con `wsl --list --verbose` y adaptar las variables
 `LINUX_USER` y `STARTDIR` del BAT si son diferentes.
 
-El lanzador abre la terminal del contenedor en `/workspace`. Desde all�:
+El lanzador abre la terminal del contenedor en `/workspace`. Desde all�:
 
 ```bash
 xschem &
@@ -81,12 +81,12 @@ klayout -e &
 ```
 
 `xschem &` abre directamente la portada de IHP. Desde Xschem se puede crear
-una hoja nueva para empezar un dise�o. La terminal muestra usuario, equipo y
+una hoja nueva para empezar un dise�o. La terminal muestra usuario, equipo y
 carpeta actual (por ejemplo `eamtastudent@Dieguito:/workspace$`), con colores,
-historial y autocompletado. La configuraci�n del proyecto se conserva aunque
+historial y autocompletado. La configuraci�n del proyecto se conserva aunque
 se ejecute `xschem` desde una subcarpeta.
 
-Para comprobar el arranque sin abrir una sesi�n interactiva, ejecutar el BAT
+Para comprobar el arranque sin abrir una sesi�n interactiva, ejecutar el BAT
 con el argumento `--check` desde PowerShell o CMD.
 
 ## Guardar y continuar en otra PC
@@ -115,3 +115,25 @@ reglas DRC/LVS y herramientas adicionales. Resultado en
 No ejecuta DRC/LVS sobre un chip ni valida el watchdog: todavía no hay diseño.
 
 Ver [procedencia](docs/PROVENANCE.md) y [solución de problemas](docs/TROUBLESHOOTING.md).
+
+## PDK actualizado (10 de octubre de 2026)
+
+El proyecto usa IHP Open PDK `main`, revisión
+`5e6d592e4002946a4616f798c357f0f3c06cf3b6` (última de main consultada al instalar).
+La imagen IIC-OSIC se fija por digest en `tools-config/toolchain.lock`.
+`bash setup.sh` descarga la revisión fijada, inicializa submódulos, compila
+los seis modelos OSDI y ejecuta las pruebas de instalación. El lanzador monta
+este PDK local sobre `/foss/pdks/ihp-sg13g2`; no cambia el PDK de otros proyectos.
+
+Para actualizar en el futuro, seleccionar una revisión oficial, modificar
+`IHP_PDK_COMMIT` en el lock y volver a ejecutar `bash setup.sh`. Revisar el
+informe antes de continuar un diseño. El script se detiene si detecta cambios
+versionados en el PDK; no los descarta.
+
+En esta PC, `C:\Users\Dieguito\Desktop\Tesis.bat` abre la terminal de
+herramientas en `/workspace`. Para trabajar con Git desde Ubuntu anfitrión,
+usar el comando WSL indicado más arriba. Los archivos reales del proyecto
+están en `/home/eamtastudent/tesis/Watchdog-IHP-SG13G2`.
+
+El diagnóstico se guarda en `build/environment-check/report.json`.
+Ver también `docs/reports/instalacion-2026-10-10.md`.

@@ -1,4 +1,4 @@
-** sch_path: /workspace/design/blocks/input/schematic/EN_INPUT_tb.sch
+** sch_path: /workspace/design/blocks/enable_input/schematic/EN_INPUT_tb.sch
 **.subckt EN_INPUT_tb
 x1 N_POR CLK SYNC EN EDGE EN_INPUT
 V_VDD VDD GND 1.2
@@ -29,8 +29,8 @@ wrdata EN_INPUT_tb_signals.txt v(CLK) v(EN) v(N_POR) v(SYNC) v(EDGE)
 **.ends
 
 * expanding   symbol:  EN_INPUT.sym # of pins=5
-** sym_path: /workspace/design/blocks/input/schematic/EN_INPUT.sym
-** sch_path: /workspace/design/blocks/input/schematic/EN_INPUT.sch
+** sym_path: /workspace/design/blocks/enable_input/schematic/EN_INPUT.sym
+** sch_path: /workspace/design/blocks/enable_input/schematic/EN_INPUT.sch
 .subckt EN_INPUT N_POR CLK SYNC EN EDGE
 *.opin EDGE
 *.opin SYNC

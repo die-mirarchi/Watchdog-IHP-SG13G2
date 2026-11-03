@@ -29,6 +29,10 @@ try:
     commit = (pdk / 'COMMIT').read_text().strip()
     assert commit == lock['IHP_PDK_COMMIT'], f'PDK mismatch: {commit}'
     report['pdk_commit'] = commit
+    for model in ('psp103', 'psp103_nqs', 'r3_cmc', 'mosvar', 'cap_cmomi', 'cap_cmomf'):
+        model_path = pdk / 'libs.tech/ngspice/osdi' / (model + '.osdi')
+        assert model_path.is_file() and model_path.stat().st_size > 0, f'Missing OSDI model: {model}'
+    report['checks']['six_osdi_models'] = 'PASS'
     for name in ('xschem', 'ngspice', 'klayout', 'magic', 'netgen', 'cace'):
         assert shutil.which(name), f'Missing executable: {name}'
     report['checks']['executables'] = 'PASS'

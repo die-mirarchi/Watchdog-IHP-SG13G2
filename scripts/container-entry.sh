@@ -19,6 +19,7 @@ cd /workspace
 action=${1:-shell}
 if [[ $# -gt 0 ]]; then shift; fi
 case "$action" in
+    prepare-pdk) exec bash /workspace/scripts/compile-pdk.sh ;;
     check) exec python3 scripts/check_environment.py "$@" ;;
     xschem) [[ -n ${DISPLAY:-} ]] || { echo 'No hay DISPLAY. Abrir desde WSLg o una sesión gráfica Linux.' >&2; exit 1; }
         exec xschem --rcfile /workspace/xschemrc "$@" ;;
