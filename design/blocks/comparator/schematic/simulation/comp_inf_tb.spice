@@ -1,0 +1,100 @@
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_inf_tb.sch
+**.subckt comp_inf_tb
+x2 net1 VBP VDD VSS bias
+V_VDD VDD GND 1.2
+V_VSS VSS GND 0
+x1 VBP VP VN OUT VDD VSS comp_inf
+**** begin user architecture code
+
+
+
+.lib cornerMOSlv.lib mos_tt
+.lib cornerMOShv.lib mos_tt
+.lib cornerHBT.lib hbt_typ
+.lib cornerRES.lib res_typ
+.lib cornerDIO.lib dio_tt
+.lib cornerCAP.lib cap_typ
+
+
+
+
+
+* VP = referencia inferior VDD/3
+* VN baja desde VP + 50 mV hasta VP - 50 mV
+* Pendiente de descarga: aproximadamente -5.5 mV/us
+VTEST_VP VP 0 DC 0.4
+VTEST_VN VN VP DC 0.05 PWL(0 0.05 5u 0.05 23.18u -0.05 30u -0.05)
+
+.control
+pwd
+echo Temp_C VDD_V Error_bajada_mV > comp_inf_corners.txt
+
+foreach tc -40 27 85
+  foreach vdd_val 1.08 1.20 1.32
+    reset
+    set temp = $tc
+
+    let vp_ref = $vdd_val / 3
+    alter V_VDD = $vdd_val
+    alter VTEST_VP = $&vp_ref
+
+    echo ---- T=$tc C  VDD=$vdd_val V ----
+    tran 5n 30u 0 5n
+
+    let out_half = $vdd_val / 2
+    let error_mv = 1000 * (v(vn) - v(vp))
+    meas tran error_bajada_mv FIND error_mv WHEN v(out)=$&out_half RISE=1 TD=5u
+    echo $tc $vdd_val $&error_bajada_mv >> comp_inf_corners.txt
+  end
+end
+.endc
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  bias.sym # of pins=2
+** sym_path: /workspace/design/blocks/bias/schematic/bias.sym
+** sch_path: /workspace/design/blocks/bias/schematic/bias.sch
+.subckt bias VBP VBN VDD VSS
+*.opin VBP
+*.opin VBN
+XM1 VBN VBN VSS VSS sg13_lv_nmos w=2u l=1u ng=1 m=1 mm_ok=1
+XM2 VBP VBP VDD VDD sg13_lv_pmos w=2u l=1u ng=1 m=1 mm_ok=1
+XR2 VBP VSS VSS rhigh w=0.5e-6 l=10.0e-6 m=1 b=0 mm_ok=1
+XR1 VDD VBN VSS rhigh w=0.5e-6 l=10.0e-6 m=1 b=0 mm_ok=1
+XC1 VBN VSS cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+XC2 VDD VBP cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  comp_inf.sym # of pins=4
+** sym_path: /workspace/design/blocks/comparator/schematic/comp_inf.sym
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_inf.sch
+.subckt comp_inf VBP VP VN OUT VDD VSS
+*.opin OUT
+*.ipin VN
+*.ipin VP
+*.ipin VBP
+x1 net2 net1 VDD VSS sg13g2_inv_1
+x2 OUT net2 VDD VSS sg13g2_inv_1
+XM1 net3 VBP VDD VDD sg13_lv_pmos w=2u l=1u ng=1 m=1 mm_ok=1
+XM7 net4 VP net3 VDD sg13_lv_pmos w=40u l=0.5u ng=5 m=1 mm_ok=1
+XM8 net1 VN net3 VDD sg13_lv_pmos w=40u l=0.5u ng=5 m=1 mm_ok=1
+XM9 net4 net4 VSS VSS sg13_lv_nmos w=4u l=1u ng=3 m=1 mm_ok=1
+XM10 net1 net4 VSS VSS sg13_lv_nmos w=4u l=1u ng=3 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_inv_1.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_inv_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_inv_1.sch
+.subckt sg13g2_inv_1 Y A VDD VSS
+
+*.opin Y
+*.ipin A
+XM1 Y A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 Y A VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+.GLOBAL GND
+.end

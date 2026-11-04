@@ -1,0 +1,27 @@
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_sup.sch
+**.subckt comp_sup VBN VP VN OUT VDD VSS
+*.opin OUT
+*.ipin VN
+*.ipin VP
+*.ipin VBN
+XM2 net1 net1 VDD VDD sg13_lv_pmos w=8u l=1u ng=1 m=1 mm_ok=1
+XM3 net3 net1 VDD VDD sg13_lv_pmos w=8u l=1u ng=1 m=1 mm_ok=1
+XM4 net1 VP net2 VSS sg13_lv_nmos w=20u l=0.5u ng=3 m=1 mm_ok=1
+XM5 net3 VN net2 VSS sg13_lv_nmos w=20u l=0.5u ng=3 m=1 mm_ok=1
+XM6 net2 VBN VSS VSS sg13_lv_nmos w=2u l=1u ng=1 m=1 mm_ok=1
+x1 net4 net3 VDD VSS sg13g2_inv_1
+x2 OUT net4 VDD VSS sg13g2_inv_1
+**.ends
+
+* expanding   symbol:  sg13g2_inv_1.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_inv_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_inv_1.sch
+.subckt sg13g2_inv_1 Y A VDD VSS
+
+*.opin Y
+*.ipin A
+XM1 Y A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 Y A VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+.end
