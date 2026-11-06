@@ -1,0 +1,262 @@
+** sch_path: /workspace/design/blocks/oscillator/schematic/wd_oscillator_tb.sch
+**.subckt wd_oscillator_tb
+x1 CLK VDD VSS wd_oscillater
+**** begin user architecture code
+
+
+
+.lib cornerMOSlv.lib mos_ss
+.lib cornerMOShv.lib mos_ss
+.lib cornerHBT.lib hbt_typ
+.lib cornerRES.lib res_typ
+.lib cornerDIO.lib dio_tt
+.lib cornerCAP.lib cap_typ
+
+
+
+
+
+* ===== TB wd_oscillator v4 =====
+* Requiere en wd_oscillater.sch: etiquetas SET (salida comp_inf) y RST (salida comp_sup).
+* Sin rshunt, sin TRNOISE, sin caps ideales. Mide sobre VC (inmune a artefactos del latch).
+.param vdd=1.2
+Vsup VDD 0 PWL(0 0 10u {vdd})
+Vgnd VSS 0 0
+.option method=gear maxord=2 reltol=1e-3
+.save v(x1.vc) v(x1.vh) v(x1.vl) v(x1.set) v(x1.rst) v(x1.chg) v(clk) i(vsup)
+
+.control
+set hcopydevtype = svg
+echo temp vdd try T_us err_pct duty_pct tstart_us dVH_mV dVL_mV pwSET_ns pwRST_ns IDD_uA clk_pct RESULT > osc_report.txt
+
+foreach t -40 27 85
+  foreach v 1.08 1.2 1.32
+    alterparam vdd = $v
+    let vm = $v/2
+    let ok = 0
+    let ntry = 0
+    foreach tm 0.1u 0.07u 0.13u
+      if ok = 0
+        let ntry = ntry + 1
+        reset
+        option temp=$t
+        tran 0.2u 0.7m 0 $tm
+        let tend = time[length(time)-1]
+        if tend > 0.699e-3
+          * 3 periodos sobre VC y sobre CLK, desde 0.25 ms
+          meas tran tvc  TRIG v(x1.vc) VAL=$&vm TD=0.25m RISE=1 TARG v(x1.vc) VAL=$&vm TD=0.25m RISE=4
+          meas tran tck  TRIG v(clk)   VAL=$&vm TD=0.25m RISE=1 TARG v(clk)   VAL=$&vm TD=0.25m RISE=4
+          let clkerr = 100*abs(tck-tvc)/tvc
+          if clkerr < 1
+            let ok = 1
+          end
+        end
+      end
+    end
+
+    let tend_ms = tend*1e3
+    hardcopy osc_{$t}_{$v}.svg v(x1.vc) v(x1.vh) v(x1.vl) v(x1.chg)
+    if tend < 0.699e-3
+      echo $t $v $&ntry - - - - - - - - - - ABORT >> osc_report.txt
+    else
+      meas tran tr1 WHEN v(x1.vc)=$&vm RISE=1 TD=0.25m
+      meas tran tf1 WHEN v(x1.vc)=$&vm FALL=1 TD=$&tr1
+      meas tran vcmax MAX v(x1.vc) FROM=0.25m TO=0.7m
+      meas tran vcmin MIN v(x1.vc) FROM=0.25m TO=0.7m
+      meas tran vh    AVG v(x1.vh) FROM=0.25m TO=0.7m
+      meas tran vl    AVG v(x1.vl) FROM=0.25m TO=0.7m
+      * arranque: primera vez que VC llega a VH-10 mV
+      let vth = vh-0.01
+      meas tran tstart WHEN v(x1.vc)=$&vth RISE=1
+      meas tran pws TRIG v(x1.set) VAL=$&vm TD=0.25m RISE=1 TARG v(x1.set) VAL=$&vm TD=0.25m FALL=1
+      meas tran pwr TRIG v(x1.rst) VAL=$&vm TD=0.25m RISE=1 TARG v(x1.rst) VAL=$&vm TD=0.25m FALL=1
+      meas tran ia1 AVG i(vsup) FROM=0.3m TO=0.5m
+      meas tran ia2 AVG i(vsup) FROM=0.5m TO=0.7m
+
+      let T_us  = tvc/3*1e6
+      let err   = T_us-100
+      let duty  = 100*(tf1-tr1)/(tvc/3)
+      let ts_us = tstart*1e6
+      let dvh   = (vcmax-vh)*1e3
+      let dvl   = (vcmin-vl)*1e3
+      let pws_ns = pws*1e9
+      let pwr_ns = pwr*1e9
+      * IDD: la menor de dos ventanas (un artefacto del latch infla solo una)
+      let idd = -ia1*1e6
+      if -ia2*1e6 < idd
+        let idd = -ia2*1e6
+      end
+
+      set res = PASS
+      if abs(err) > 3
+        set res = FAIL_T
+      end
+      if abs(duty-50) > 5
+        set res = FAIL_DUTY
+      end
+      if ts_us > 200
+        set res = FAIL_START
+      end
+      if abs(dvh) > 20
+        set res = FAIL_VH
+      end
+      if abs(dvl) > 20
+        set res = FAIL_VL
+      end
+      if pws_ns < 20
+        set res = FAIL_PWSET
+      end
+      if pwr_ns < 20
+        set res = FAIL_PWRST
+      end
+      if idd > 15
+        set res = FAIL_IDD
+      end
+      if ok = 0
+        set res = CHK_CLK
+      end
+      echo $t $v $&ntry $&T_us $&err $&duty $&ts_us $&dvh $&dvl $&pws_ns $&pwr_ns $&idd $&clkerr $res >> osc_report.txt
+    end
+  end
+end
+echo listo >> osc_report.txt
+shell cat osc_report.txt
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  wd_oscillater.sym # of pins=1
+** sym_path: /workspace/design/blocks/oscillator/schematic/wd_oscillater.sym
+** sch_path: /workspace/design/blocks/oscillator/schematic/wd_oscillater.sch
+.subckt wd_oscillater CLK VDD VSS
+*.opin CLK
+x1 net2 net1 VDD VSS bias
+x2 net2 VL VC SET VDD VSS comp_inf
+x3 net1 VC VH RST VDD VSS comp_sup
+XR1 VDD VH VSS rhigh w=1e-6 l=150.0e-6 m=1 b=0 mm_ok=1
+XR2 VH VL VSS rhigh w=1e-6 l=150.0e-6 m=1 b=0 mm_ok=1
+XR3 VL VSS VSS rhigh w=1e-6 l=150.0e-6 m=1 b=0 mm_ok=1
+x4 NCHG SET CHG VDD VSS sg13g2_nor2_1
+x5 CHG RST NCHG VDD VSS sg13g2_nor2_1
+x6 DRIVE CHG VDD VSS sg13g2_buf_1
+x7 CLK CHG VDD VSS sg13g2_buf_4
+XR4 VC DRIVE VSS rppd w=0.5e-6 l=175.5e-6 m=1 b=15 mm_ok=1
+XC1 VH VSS cap_cmim w=20.0e-6 l=20.0e-6 m=1 mm_ok=1
+XC3 VL VSS cap_cmim w=20.0e-6 l=20.0e-6 m=1 mm_ok=1
+XC4 VC VSS cap_cmim w=64.0e-6 l=64.0e-6 m=8 mm_ok=1
+.ends
+
+
+* expanding   symbol:  bias.sym # of pins=2
+** sym_path: /workspace/design/blocks/bias/schematic/bias.sym
+** sch_path: /workspace/design/blocks/bias/schematic/bias.sch
+.subckt bias VBP VBN VDD VSS
+*.opin VBP
+*.opin VBN
+XM1 VBN VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM2 VBP VBP VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XR1 VDD VBN VSS rhigh w=0.5e-6 l=237.0e-6 m=1 b=0 mm_ok=1
+XC1 VBN VSS cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+XC2 VDD VBP cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+XM3 VBP VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  comp_inf.sym # of pins=4
+** sym_path: /workspace/design/blocks/comparator/schematic/comp_inf.sym
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_inf.sch
+.subckt comp_inf VBP VP VN OUT VDD VSS
+*.opin OUT
+*.ipin VN
+*.ipin VP
+*.ipin VBP
+XM1 net3 VBP VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XM7 net4 VP net3 VDD sg13_lv_pmos w=20u l=1u ng=4 m=1 mm_ok=1
+XM8 net1 VN net3 VDD sg13_lv_pmos w=20u l=1u ng=4 m=1 mm_ok=1
+XM9 net4 net4 VSS VSS sg13_lv_nmos w=1u l=8u ng=1 m=1 mm_ok=1
+XM10 net1 net4 VSS VSS sg13_lv_nmos w=1u l=8u ng=1 m=1 mm_ok=1
+XM2 net2 VBP VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XM3 net2 net1 VSS VSS sg13_lv_nmos w=2u l=8u ng=1 m=1 mm_ok=1
+x1 net2 OUT VDD VSS schmitt
+.ends
+
+
+* expanding   symbol:  comp_sup.sym # of pins=4
+** sym_path: /workspace/design/blocks/comparator/schematic/comp_sup.sym
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_sup.sch
+.subckt comp_sup VBN VP VN OUT VDD VSS
+*.opin OUT
+*.ipin VN
+*.ipin VP
+*.ipin VBN
+XM2 net1 net1 VDD VDD sg13_lv_pmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM3 net3 net1 VDD VDD sg13_lv_pmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM4 net1 VP net2 VSS sg13_lv_nmos w=20u l=2u ng=4 m=1 mm_ok=1
+XM5 net3 VN net2 VSS sg13_lv_nmos w=20u l=2u ng=4 m=1 mm_ok=1
+XM6 net2 VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM1 net4 net3 VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XM7 net4 VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+x1 net4 OUT VDD VSS schmitt
+.ends
+
+
+* expanding   symbol:  sg13g2_nor2_1.sym # of pins=3
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_nor2_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_nor2_1.sch
+.subckt sg13g2_nor2_1 Y A B VDD VSS
+
+*.opin Y
+*.ipin B
+*.ipin A
+XM1 Y A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 Y B VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net1 A VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM4 Y B net1 VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_buf_1.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_buf_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_buf_1.sch
+.subckt sg13g2_buf_1 X A VDD VSS
+
+*.ipin A
+*.opin X
+XM1 net1 A VSS VSS sg13_lv_nmos w=550.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 X net1 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net1 A VDD VDD sg13_lv_pmos w=840.00n l=130.00n ng=1 m=1 mm_ok=1
+XM4 X net1 VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_buf_4.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_buf_4.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_buf_4.sch
+.subckt sg13g2_buf_4 X A VDD VSS
+
+*.ipin A
+*.opin X
+XM1 net1 A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 X net1 VSS VSS sg13_lv_nmos w=2.96u l=130.00n ng=4 m=1 mm_ok=1
+XM3 net1 A VDD VDD sg13_lv_pmos w=1.68u l=130.00n ng=2 m=1 mm_ok=1
+XM4 X net1 VDD VDD sg13_lv_pmos w=4.48u l=130.00n ng=4 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  schmitt.sym # of pins=2
+** sym_path: /workspace/design/blocks/schmitt/schematic/schmitt.sym
+** sch_path: /workspace/design/blocks/schmitt/schematic/schmitt.sch
+.subckt schmitt IN OUT VDD VSS
+*.opin OUT
+*.ipin IN
+XM4 net1 IN VDD VDD sg13_lv_pmos w=1.04u l=0.13u ng=1 m=1 mm_ok=1
+XM6 OUT IN net2 VSS sg13_lv_nmos w=0.76u l=0.13u ng=1 m=1 mm_ok=1
+XM5 OUT IN net1 VDD sg13_lv_pmos w=1.04u l=0.13u ng=1 m=1 mm_ok=1
+XM7 net2 IN VSS VSS sg13_lv_nmos w=0.76u l=0.13u ng=1 m=1 mm_ok=1
+XM8 VSS OUT net1 VDD sg13_lv_pmos w=0.42u l=0.13u ng=1 m=1 mm_ok=1
+XM9 VDD OUT net2 VSS sg13_lv_nmos w=0.42u l=0.13u ng=1 m=1 mm_ok=1
+.ends
+
+.end

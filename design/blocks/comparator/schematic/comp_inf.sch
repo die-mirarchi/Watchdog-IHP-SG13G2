@@ -8,10 +8,10 @@ E {}
 N 0 -200 20 -200 {lab=OUT}
 N 10 -230 30 -230 {lab=VN}
 N 10 -260 30 -260 {lab=VP}
-N 140 100 180 100 {lab=#net1}
+N 140 100 220 100 {lab=#net1}
 N 260 100 300 100 {lab=#net2}
 N 10 -290 30 -290 {lab=VBP}
-N 380 100 440 100 {lab=OUT}
+N 480 100 540 100 {lab=OUT}
 N -40 -50 -30 -50 {lab=VBP}
 N 10 -90 10 -80 {lab=VDD}
 N 0 -130 10 -130 {lab=VDD}
@@ -48,6 +48,21 @@ N -110 200 -90 200 {lab=VSS}
 N 140 150 160 150 {lab=VSS}
 N 160 150 160 200 {lab=VSS}
 N 140 200 160 200 {lab=VSS}
+N 210 -50 220 -50 {lab=VBP}
+N 40 -90 260 -90 {lab=VDD}
+N 260 -90 260 -80 {lab=VDD}
+N 260 -50 280 -50 {lab=VDD}
+N 280 -90 280 -50 {lab=VDD}
+N 260 -90 280 -90 {lab=VDD}
+N 260 -20 260 100 {lab=#net2}
+N 220 100 220 150 {lab=#net1}
+N 260 100 260 120 {lab=#net2}
+N 160 200 260 200 {lab=VSS}
+N 260 190 260 200 {lab=VSS}
+N 260 150 270 150 {lab=VSS}
+N 270 150 270 190 {lab=VSS}
+N 260 190 270 190 {lab=VSS}
+N 260 180 260 190 {lab=VSS}
 C {opin.sym} 20 -200 0 0 {name=p6 lab=OUT}
 C {lab_pin.sym} 30 -230 0 1 {name=p7 sig_type=std_logic lab=VN
 }
@@ -57,16 +72,14 @@ C {ipin.sym} 10 -230 0 0 {name=p11 lab=VN}
 C {lab_pin.sym} 30 -260 0 1 {name=p14 sig_type=std_logic lab=VP
 }
 C {ipin.sym} 10 -260 0 0 {name=p15 lab=VP}
-C {sg13g2_inv_1.sym} 220 100 0 0 {name=x1 VDD=VDD VSS=VSS prefix=sg13g2_}
-C {sg13g2_inv_1.sym} 340 100 0 0 {name=x2 VDD=VDD VSS=VSS prefix=sg13g2_}
 C {lab_pin.sym} 30 -290 0 1 {name=p12 sig_type=std_logic lab=VBP
 }
 C {ipin.sym} 10 -290 0 0 {name=p13 lab=VBP}
-C {lab_pin.sym} 440 100 0 1 {name=p16 sig_type=std_logic lab=OUT
+C {lab_pin.sym} 540 100 0 1 {name=p16 sig_type=std_logic lab=OUT
 }
 C {sg13g2_pr/sg13_lv_pmos.sym} -10 -50 0 0 {name=M1
-l=1u
-w=2u
+l=4u
+w=4u
 ng=1
 m=1
 mm_ok=1
@@ -78,18 +91,18 @@ C {lab_pin.sym} -40 -50 0 0 {name=p17 sig_type=std_logic lab=VBP
 C {lab_pin.sym} 0 -130 0 0 {name=p18 sig_type=std_logic lab=VDD
 }
 C {sg13g2_pr/sg13_lv_pmos.sym} -130 40 0 0 {name=M7
-l=0.5u
-w=40u
-ng=5
+l=1u
+w=20u
+ng=4
 m=1
 mm_ok=1
 model=sg13_lv_pmos
 spiceprefix=X
 }
 C {sg13g2_pr/sg13_lv_pmos.sym} 120 40 0 0 {name=M8
-l=0.5u
-w=40u
-ng=5
+l=1u
+w=20u
+ng=4
 m=1
 mm_ok=1
 model=sg13_lv_pmos
@@ -104,21 +117,42 @@ C {lab_pin.sym} -160 40 0 0 {name=p21 sig_type=std_logic lab=VP
 C {lab_pin.sym} 80 40 0 0 {name=p22 sig_type=std_logic lab=VN
 }
 C {sg13g2_pr/sg13_lv_nmos.sym} -130 150 0 0 {name=M9
-l=1u
-w=4u
-ng=3
+l=8u
+w=1u
+ng=1
 m=1
 mm_ok=1
 model=sg13_lv_nmos
 spiceprefix=X
 }
 C {sg13g2_pr/sg13_lv_nmos.sym} 120 150 0 0 {name=M10
-l=1u
-w=4u
-ng=3
+l=8u
+w=1u
+ng=1
 m=1
 mm_ok=1
 model=sg13_lv_nmos
 spiceprefix=X
 }
 C {lab_pin.sym} 20 230 0 1 {name=p23 sig_type=std_logic lab=VSS}
+C {sg13g2_pr/sg13_lv_pmos.sym} 240 -50 0 0 {name=M2
+l=4u
+w=4u
+ng=1
+m=1
+mm_ok=1
+model=sg13_lv_pmos
+spiceprefix=X
+}
+C {lab_pin.sym} 210 -50 0 0 {name=p1 sig_type=std_logic lab=VBP
+}
+C {sg13g2_pr/sg13_lv_nmos.sym} 240 150 0 0 {name=M3
+l=8u
+w=2u
+ng=1
+m=1
+mm_ok=1
+model=sg13_lv_nmos
+spiceprefix=X
+}
+C {schmitt.sym} 450 100 0 0 {name=x1 VDD=VDD VSS=VSS}
