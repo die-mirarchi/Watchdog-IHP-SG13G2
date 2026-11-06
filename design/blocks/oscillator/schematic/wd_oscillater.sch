@@ -5,7 +5,7 @@ V {}
 S {}
 F {}
 E {}
-N -220 -30 -220 20 {lab=#net1}
+N -220 -30 -220 20 {lab=VBN}
 N -340 290 -340 310 {lab=VSS}
 N -340 0 -340 30 {lab=VDD}
 N -340 110 -150 110 {lab=VH}
@@ -15,10 +15,10 @@ N -340 90 -340 110 {lab=VH}
 N -150 60 -150 110 {lab=VH}
 N -340 190 -340 210 {lab=VL}
 N -200 -30 -200 210 {lab=VL}
-N -220 20 -150 20 {lab=#net1}
+N -220 20 -150 20 {lab=VBN}
 N -340 210 -200 210 {lab=VL}
 N -200 -30 -150 -30 {lab=VL}
-N -220 -50 -150 -50 {lab=#net2}
+N -220 -50 -150 -50 {lab=VBP}
 N 240 80 390 80 {lab=CHG}
 N 240 -40 270 -40 {lab=CHG}
 N 150 -50 220 -50 {lab=SET}
@@ -155,3 +155,5 @@ C {lab_pin.sym} 220 -80 0 0 {name=p17 sig_type=std_logic lab=SET
 }
 C {lab_pin.sym} 210 40 0 0 {name=p18 sig_type=std_logic lab=RST
 }
+C {lab_pin.sym} -220 20 0 0 {name=lbl_vbn sig_type=std_logic lab=VBN}
+C {lab_pin.sym} -220 -50 0 0 {name=lbl_vbp sig_type=std_logic lab=VBP}

@@ -5,9 +5,9 @@ V {}
 S {}
 F {}
 E {}
-N 90 -20 120 -20 {lab=#net1}
-N 120 -20 120 -0 {lab=#net1}
-N 120 -0 160 -0 {lab=#net1}
+N 90 -20 120 -20 {lab=P1}
+N 120 -20 120 -0 {lab=P1}
+N 120 -0 160 -0 {lab=P1}
 N 160 20 160 40 {lab=POR_RAW_N}
 N -90 40 160 40 {lab=POR_RAW_N}
 N -90 20 -90 40 {lab=POR_RAW_N}
@@ -37,3 +37,6 @@ C {lab_pin.sym} -90 -40 0 0 {name=p3 sig_type=std_logic lab=CLK
 }
 C {lab_pin.sym} -90 40 0 0 {name=p4 sig_type=std_logic lab=POR_RAW_N
 }
+C {lab_pin.sym} 120 -20 0 0 {name=lbl_p1 sig_type=std_logic lab=P1}
+C {lab_pin.sym} 90 0 0 1 {name=lbl_p1_n sig_type=std_logic lab=P1_N}
+C {lab_pin.sym} 340 0 0 1 {name=lbl_por_b_n sig_type=std_logic lab=POR_B_N}

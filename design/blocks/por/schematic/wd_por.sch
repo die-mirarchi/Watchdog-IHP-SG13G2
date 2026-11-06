@@ -7,37 +7,37 @@ F {}
 E {}
 N 120 -150 140 -150 {lab=POR_RAW_N}
 N -20 -80 490 -80 {lab=VDD}
-N 0 0 0 20 {lab=#net1}
+N 0 0 0 20 {lab=VD}
 N -20 90 0 90 {lab=VSS}
-N 0 0 110 0 {lab=#net1}
-N 0 -20 0 0 {lab=#net1}
-N 110 -0 110 60 {lab=#net1}
-N 110 60 150 60 {lab=#net1}
+N 0 0 110 0 {lab=VD}
+N 0 -20 0 0 {lab=VD}
+N 110 -0 110 60 {lab=VD}
+N 110 60 150 60 {lab=VD}
 N 200 90 370 90 {lab=VSS}
 N -0 80 0 90 {lab=VSS}
 N 0 90 200 90 {lab=VSS}
-N 190 10 250 10 {lab=#net2}
-N 190 10 190 30 {lab=#net2}
-N 370 -0 370 20 {lab=#net3}
+N 190 10 250 10 {lab=X}
+N 190 10 190 30 {lab=X}
+N 370 -0 370 20 {lab=DELAY}
 N 370 80 370 90 {lab=VSS}
 N 490 -80 530 -80 {lab=VDD}
 N 530 -80 530 -70 {lab=VDD}
 N 490 -80 490 -40 {lab=VDD}
-N 370 -0 530 -0 {lab=#net3}
-N 370 -20 370 -0 {lab=#net3}
-N 530 -10 530 -0 {lab=#net3}
-N 530 10 580 10 {lab=#net3}
-N 530 0 530 10 {lab=#net3}
-N 330 10 510 10 {lab=#net4}
-N 510 10 510 50 {lab=#net4}
-N 510 50 580 50 {lab=#net4}
+N 370 -0 530 -0 {lab=DELAY}
+N 370 -20 370 -0 {lab=DELAY}
+N 530 -10 530 -0 {lab=DELAY}
+N 530 10 580 10 {lab=DELAY}
+N 530 0 530 10 {lab=DELAY}
+N 330 10 510 10 {lab=VOK}
+N 510 10 510 50 {lab=VOK}
+N 510 50 580 50 {lab=VOK}
 N 700 30 710 30 {lab=POR_RAW_N}
 N 530 -40 540 -40 {lab=VDD}
 N 540 -80 540 -40 {lab=VDD}
 N 530 -80 540 -80 {lab=VDD}
 N 190 60 200 60 {lab=VSS}
 N 200 60 200 90 {lab=VSS}
-N 190 -20 190 10 {lab=#net2}
+N 190 -20 190 10 {lab=X}
 C {sg13g2_pr/rhigh.sym} 0 -50 0 0 {name=R1
 w=0.5e-6
 l=360e-6
@@ -117,3 +117,7 @@ b=0
   mm_ok=1
 value="expr_eng(  ( 1.6e-4 / @w + 1360.0 * ( (@b + 1)* @l + ( 1.081*( @w - 0.04e-6 ) + 0.18e-6 )*@b ) / ( @w - 0.04e-6 ) ) / @m  )"
 }
+C {lab_pin.sym} 0 0 0 0 {name=lbl_vd sig_type=std_logic lab=VD}
+C {lab_pin.sym} 190 10 0 0 {name=lbl_x sig_type=std_logic lab=X}
+C {lab_pin.sym} 370 -0 0 0 {name=lbl_delay sig_type=std_logic lab=DELAY}
+C {lab_pin.sym} 510 10 0 1 {name=lbl_vok sig_type=std_logic lab=VOK}

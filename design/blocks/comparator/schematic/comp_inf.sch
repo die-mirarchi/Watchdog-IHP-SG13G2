@@ -8,18 +8,18 @@ E {}
 N 0 -200 20 -200 {lab=OUT}
 N 10 -230 30 -230 {lab=VN}
 N 10 -260 30 -260 {lab=VP}
-N 140 100 220 100 {lab=#net1}
-N 260 100 300 100 {lab=#net2}
+N 140 100 220 100 {lab=OUT1}
+N 260 100 300 100 {lab=OUT2}
 N 10 -290 30 -290 {lab=VBP}
 N 480 100 540 100 {lab=OUT}
 N -40 -50 -30 -50 {lab=VBP}
 N 10 -90 10 -80 {lab=VDD}
 N 0 -130 10 -130 {lab=VDD}
-N 10 -20 10 -10 {lab=#net3}
-N -110 -10 10 -10 {lab=#net3}
-N -110 -10 -110 10 {lab=#net3}
-N 10 -10 140 -10 {lab=#net3}
-N 140 -10 140 10 {lab=#net3}
+N 10 -20 10 -10 {lab=TAIL}
+N -110 -10 10 -10 {lab=TAIL}
+N -110 -10 -110 10 {lab=TAIL}
+N 10 -10 140 -10 {lab=TAIL}
+N 140 -10 140 10 {lab=TAIL}
 N 10 -50 40 -50 {lab=VDD}
 N 40 -90 40 -50 {lab=VDD}
 N 10 -90 40 -90 {lab=VDD}
@@ -28,20 +28,20 @@ N -110 40 -60 40 {lab=VDD}
 N 140 40 180 40 {lab=VDD}
 N -160 40 -150 40 {lab=VP}
 N 80 40 100 40 {lab=VN}
-N -110 100 -110 120 {lab=#net4}
-N 140 100 140 120 {lab=#net1}
-N -150 100 -150 150 {lab=#net4}
-N -150 100 -110 100 {lab=#net4}
-N -110 70 -110 100 {lab=#net4}
-N -110 100 30 100 {lab=#net4}
-N 30 100 30 150 {lab=#net4}
-N 30 150 100 150 {lab=#net4}
+N -110 100 -110 120 {lab=DIO}
+N 140 100 140 120 {lab=OUT1}
+N -150 100 -150 150 {lab=DIO}
+N -150 100 -110 100 {lab=DIO}
+N -110 70 -110 100 {lab=DIO}
+N -110 100 30 100 {lab=DIO}
+N 30 100 30 150 {lab=DIO}
+N 30 150 100 150 {lab=DIO}
 N -110 180 -110 200 {lab=VSS}
 N 20 200 140 200 {lab=VSS}
 N 140 180 140 200 {lab=VSS}
 N 20 200 20 230 {lab=VSS}
 N -90 200 20 200 {lab=VSS}
-N 140 70 140 100 {lab=#net1}
+N 140 70 140 100 {lab=OUT1}
 N -110 150 -90 150 {lab=VSS}
 N -90 150 -90 200 {lab=VSS}
 N -110 200 -90 200 {lab=VSS}
@@ -54,9 +54,9 @@ N 260 -90 260 -80 {lab=VDD}
 N 260 -50 280 -50 {lab=VDD}
 N 280 -90 280 -50 {lab=VDD}
 N 260 -90 280 -90 {lab=VDD}
-N 260 -20 260 100 {lab=#net2}
-N 220 100 220 150 {lab=#net1}
-N 260 100 260 120 {lab=#net2}
+N 260 -20 260 100 {lab=OUT2}
+N 220 100 220 150 {lab=OUT1}
+N 260 100 260 120 {lab=OUT2}
 N 160 200 260 200 {lab=VSS}
 N 260 190 260 200 {lab=VSS}
 N 260 150 270 150 {lab=VSS}
@@ -156,3 +156,7 @@ model=sg13_lv_nmos
 spiceprefix=X
 }
 C {schmitt.sym} 450 100 0 0 {name=x1 VDD=VDD VSS=VSS}
+C {lab_pin.sym} 140 100 0 0 {name=lbl_out1 sig_type=std_logic lab=OUT1}
+C {lab_pin.sym} 260 100 0 0 {name=lbl_out2 sig_type=std_logic lab=OUT2}
+C {lab_pin.sym} 10 -10 0 0 {name=lbl_tail sig_type=std_logic lab=TAIL}
+C {lab_pin.sym} -110 100 0 0 {name=lbl_dio sig_type=std_logic lab=DIO}
