@@ -67,8 +67,8 @@ C {lab_pin.sym} -20 -80 0 0 {name=p1 sig_type=std_logic lab=VDD
 }
 C {lab_pin.sym} -20 90 0 0 {name=p2 sig_type=std_logic lab=VSS}
 C {sg13g2_pr/sg13_lv_nmos.sym} 170 60 0 0 {name=M1
-l=4u
-w=1u
+l=9.9u
+w=0.3u
 ng=1
 m=1
 mm_ok=1
