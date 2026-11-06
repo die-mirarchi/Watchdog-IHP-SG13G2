@@ -4,7 +4,11 @@ Generados el 6/11/2026 a partir del netlist de Xschem del repositorio (commit 96
 Cada gráfico superpone las 9 condiciones: **color = temperatura** (azul −40 °C, verde 27 °C, naranja 85 °C) y **trazo = VDD** (rayado 1,08 V, continuo 1,2 V, punteado 1,32 V). R/C típicos.
 Simulador: ngspice 42 + OSDI (PSP103, r3_cmc), `.option method=gear maxord=2 reltol=1e-3`.
 
-Estructura: `graphs/<celda>/<tt|ss>/*.png`. Scripts: `verification/testbenches/pvt_tt_ss/`.
+Estructura: `graphs/<celda>/<tt|ss>/*.png`. Scripts: `verification/testbenches/pvt_tt_ss/` (validación) y `verification/testbenches/pvt_tt_ss/funcionamiento/` (corrientes, tiempo, flancos).
+
+Tablas de valores clave: `verification/Resumen_validacion_tt_ss.pdf`.
+
+## 1 · Validación funcional (PASS/FAIL)
 
 | Celda | Prueba | Criterio | tt | ss | Resultado clave | Archivos |
 |---|---|---|---|---|---|---|
@@ -24,3 +28,26 @@ Notas numéricas:
 - Oscilador: 4 de 18 corridas necesitaron tmax 0,07 µs (artefacto del latch: un pulso espurio que cambia de lugar con el paso).
 - wd_reset_sync, EN_INPUT, WDI_INPUT: fuente auxiliar `VBK` (sin efecto eléctrico) con puntos de quiebre cada 25 ps alrededor de los flancos; sin ella los FF capturan en el flanco de bajada.
 - Integración: FF del sincronizador en XSPICE (`d_dff`), `gmin=1e-11`, reintentos de tmax 100 → 70 → 130 ns (6 de 18 corridas).
+
+## 2 · Funcionamiento general: corrientes, tiempo y flancos
+
+Mismas 9 condiciones superpuestas por corner. Consumos medidos con la celda en una fuente propia; dentro del oscilador y del POR, con amperímetros (fuentes de 0 V) en la alimentación de cada bloque. Flancos con puntos de simulación de 20–50 ps (o paso máximo de 0,2–5 ps).
+
+| Celda | Archivo (`<c>` = tt/ss) | Qué muestra |
+|---|---|---|
+| bias | bias_<c>_corrientes_arranque.png | I_REF, I_OUT e I_DD con escalón de VDD de 100 ns (establecimiento < 1 µs) |
+| bias | bias_<c>_corriente_vs_VDD_y_T.png | I_OUT e I_DD vs VDD (DC) e I_OUT vs T: fuente referida a resistencia (~120 %/V, ~2300 ppm/°C) |
+| schmitt | schmitt_<c>_transitorio_y_corriente.png | Rampa triangular en IN: OUT y corriente de cortocircuito en el tiempo |
+| schmitt | schmitt_<c>_conmutacion.png | Retardos t_pHL/t_pLH y t_r/t_f con 10 fF, picos de I_DD |
+| schmitt | schmitt_<c>_corriente_DC.png | I_DD vs V(IN) en ambos sentidos (histéresis también en la corriente) |
+| comp_sup / comp_inf | <celda>_<c>_respuesta_temporal.png | Escalones de ±20 mV alrededor del umbral: OUT1, OUT2, OUT e I_DD (ns) |
+| comp_sup / comp_inf | <celda>_<c>_corrientes.png | I_DD, cola y 2.ª etapa vs entrada (DC) |
+| wd_oscillater | osc_<c>_diagrama_temporal.png | 2 períodos en régimen: VC con VH/VL, SET, RST, CLK |
+| wd_oscillater | osc_<c>_consumo.png | I_DD en el tiempo (log) y consumo medio por bloque (barras apiladas) |
+| wd_oscillater | osc_<c>_disparo_comparadores.png | VC − VH y VL − VC alrededor de cada conmutación; pulsos SET/RST |
+| wd_oscillater | osc_<c>_flancos_CLK.png | Latch NOR + buf_4 (banco aparte, mismas cargas): retardos, t_r/t_f de CLK |
+| wd_por | por_<c>_nodos_internos.png | VDD, VD, X, VOK, DELAY y POR_RAW_N con rampas de 10 µs (subida y bajada) |
+| wd_por | por_<c>_corrientes.png | I_DD vs VDD (DC), I_DD en el tiempo y consumo por rama |
+| wd_reset_sync | rsync_<c>_consumo_y_flancos.png | I_DD de la celda (log), CLK→POR_B, aserción asíncrona, pico de corriente |
+| EN_INPUT / WDI_INPUT | <celda>_<c>_consumo_y_flancos.png | I_DD de la celda (log), CLK→EDGE↑/↓, pico de corriente |
+| integracion | integracion_<c>_consumo.png | VDD, POR_B, I_DD total en el tiempo y consumo osc/POR en régimen |
