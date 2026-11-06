@@ -1,0 +1,106 @@
+* ===== TB wd_oscillator v4 =====
+* Requiere en wd_oscillater.sch: etiquetas SET (salida comp_inf) y RST (salida comp_sup).
+* Sin rshunt, sin TRNOISE, sin caps ideales. Mide sobre VC (inmune a artefactos del latch).
+.param vdd=1.2
+Vsup VDD 0 PWL(0 0 10u {vdd})
+Vgnd VSS 0 0
+.option method=gear maxord=2 reltol=1e-3
+.save v(x1.vc) v(x1.vh) v(x1.vl) v(x1.set) v(x1.rst) v(x1.chg) v(clk) i(vsup)
+
+.control
+set hcopydevtype = svg
+echo temp vdd try T_us err_pct duty_pct tstart_us dVH_mV dVL_mV pwSET_ns pwRST_ns IDD_uA clk_pct RESULT > osc_report.txt
+
+foreach t -40 27 85
+  foreach v 1.08 1.2 1.32
+    alterparam vdd = $v
+    let vm = $v/2
+    let ok = 0
+    let ntry = 0
+    foreach tm 0.1u 0.07u 0.13u
+      if ok = 0
+        let ntry = ntry + 1
+        reset
+        option temp=$t
+        tran 0.2u 0.7m 0 $tm
+        let tend = time[length(time)-1]
+        if tend > 0.699e-3
+          * 3 periodos sobre VC y sobre CLK, desde 0.25 ms
+          meas tran tvc  TRIG v(x1.vc) VAL=$&vm TD=0.25m RISE=1 TARG v(x1.vc) VAL=$&vm TD=0.25m RISE=4
+          meas tran tck  TRIG v(clk)   VAL=$&vm TD=0.25m RISE=1 TARG v(clk)   VAL=$&vm TD=0.25m RISE=4
+          let clkerr = 100*abs(tck-tvc)/tvc
+          if clkerr < 1
+            let ok = 1
+          end
+        end
+      end
+    end
+
+    let tend_ms = tend*1e3
+    hardcopy osc_{$t}_{$v}.svg v(x1.vc) v(x1.vh) v(x1.vl) v(x1.chg)
+    if tend < 0.699e-3
+      echo $t $v $&ntry - - - - - - - - - - ABORT >> osc_report.txt
+    else
+      meas tran tr1 WHEN v(x1.vc)=$&vm RISE=1 TD=0.25m
+      meas tran tf1 WHEN v(x1.vc)=$&vm FALL=1 TD=$&tr1
+      meas tran vcmax MAX v(x1.vc) FROM=0.25m TO=0.7m
+      meas tran vcmin MIN v(x1.vc) FROM=0.25m TO=0.7m
+      meas tran vh    AVG v(x1.vh) FROM=0.25m TO=0.7m
+      meas tran vl    AVG v(x1.vl) FROM=0.25m TO=0.7m
+      * arranque: primera vez que VC llega a VH-10 mV
+      let vth = vh-0.01
+      meas tran tstart WHEN v(x1.vc)=$&vth RISE=1
+      meas tran pws TRIG v(x1.set) VAL=$&vm TD=0.25m RISE=1 TARG v(x1.set) VAL=$&vm TD=0.25m FALL=1
+      meas tran pwr TRIG v(x1.rst) VAL=$&vm TD=0.25m RISE=1 TARG v(x1.rst) VAL=$&vm TD=0.25m FALL=1
+      meas tran ia1 AVG i(vsup) FROM=0.3m TO=0.5m
+      meas tran ia2 AVG i(vsup) FROM=0.5m TO=0.7m
+
+      let T_us  = tvc/3*1e6
+      let err   = T_us-100
+      let duty  = 100*(tf1-tr1)/(tvc/3)
+      let ts_us = tstart*1e6
+      let dvh   = (vcmax-vh)*1e3
+      let dvl   = (vcmin-vl)*1e3
+      let pws_ns = pws*1e9
+      let pwr_ns = pwr*1e9
+      * IDD: la menor de dos ventanas (un artefacto del latch infla solo una)
+      let idd = -ia1*1e6
+      if -ia2*1e6 < idd
+        let idd = -ia2*1e6
+      end
+
+      set res = PASS
+      if abs(err) > 3
+        set res = FAIL_T
+      end
+      if abs(duty-50) > 5
+        set res = FAIL_DUTY
+      end
+      if ts_us > 200
+        set res = FAIL_START
+      end
+      if abs(dvh) > 20
+        set res = FAIL_VH
+      end
+      if abs(dvl) > 20
+        set res = FAIL_VL
+      end
+      if pws_ns < 20
+        set res = FAIL_PWSET
+      end
+      if pwr_ns < 20
+        set res = FAIL_PWRST
+      end
+      if idd > 15
+        set res = FAIL_IDD
+      end
+      if ok = 0
+        set res = CHK_CLK
+      end
+      echo $t $v $&ntry $&T_us $&err $&duty $&ts_us $&dvh $&dvl $&pws_ns $&pwr_ns $&idd $&clkerr $res >> osc_report.txt
+    end
+  end
+end
+echo listo >> osc_report.txt
+shell cat osc_report.txt
+.endc

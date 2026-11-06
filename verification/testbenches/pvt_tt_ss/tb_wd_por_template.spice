@@ -1,0 +1,129 @@
+** tb_wd_por v2 -- validacion del POR (IHP SG13G2, ngspice 42 + OSDI)
+** Esquina: MOS=@MOS@  RES=@RES@  CAP=@CAP@  T=@TEMP@ C  VH=@VH@ V
+.lib @MODELS@/cornerMOSlv.lib @MOS@
+.lib @MODELS@/cornerRES.lib @RES@
+.lib @MODELS@/cornerCAP.lib @CAP@
+.include @STDCELL@
+.include @DUT@
+.temp @TEMP@
+.option method=gear maxord=2 reltol=1e-3
+
+* Perfil de VDD (us): A rampa 1ms | B caida a 0.45V 0.5ms | C bajada lenta 1ms |
+* D rampa 1us | E corte de 10us | F rampa 10us | G rampa 100us | H rampa 10ms
+VDD VDD 0 PWL(0 0 1000u @VH@ 1300u @VH@ 1310u 0.45 1810u 0.45 1820u @VH@ 2000u @VH@
++ 3000u 0 3100u 0 3101u @VH@ 3200u @VH@ 3201u 0 3211u 0 3212u @VH@ 3300u @VH@
++ 3301u 0 3400u 0 3410u @VH@ 3500u @VH@ 3501u 0 3600u 0 3700u @VH@ 3800u @VH@
++ 3801u 0 3900u 0 13900u @VH@ 14000u @VH@)
+VSS VSS 0 0
+XDUT VDD VSS POR_RAW_N wd_por
+* carga: entrada R_B de dos dfrbp_1 (~2 fF c/u) + cableado
+CL POR_RAW_N 0 10f
+
+.control
+* criterios
+let VREL_MAX  = 1.03
+let VREL_MIN  = 0.45
+let VBLIP_MAX = 0.60
+let IDD_MAX   = 2u
+let VUND      = 0.30
+tran 0.1u 14000u 0 @TMAX@
+* d > 0  <=>  POR_RAW_N liberado (> VDD/2). Con VDD < VUND no se evalua (cuenta como reset)
+let d = (v(por_raw_n) - 0.5*v(vdd))*(v(vdd) gt VUND) - 0.01*(v(vdd) le VUND)
+* -1 = el evento no ocurrio
+let vA=-1
+let vC=-1
+let tB=-1
+let tD=-1
+let vD=-1
+let tE=-1
+let vF=-1
+let vG=-1
+let vH=-1
+let bA=-1
+let bD=-1
+let bE=-1
+let bF=-1
+let bG=-1
+let bH=-1
+let xA=-1
+let xD=-1
+let xE=-1
+let xF=-1
+let xG=-1
+let xH=-1
+* Por ventana: v* = VDD en la liberacion final (rise=LAST); b* = VDD en un pulso previo (blip), si hubo dos o mas subidas
+* A: rampa 1 ms
+meas tran vA  find v(vdd) when d=0 rise=LAST from=0 to=1300u
+meas tran xA  when d=0 rise=2 from=0 to=1300u
+meas tran bA  find v(vdd) when d=0 rise=1 from=0 to=1300u
+meas tran idd avg i(vdd) from=1200u to=1300u
+* B: caida a 0.45 V durante 0.5 ms (debe reactivar el reset)
+meas tran tB  when d=0 fall=1 from=1300u to=1815u
+* C: bajada lenta 1 ms (umbral de bajada)
+meas tran vC  find v(vdd) when d=0 fall=1 from=2000u to=3050u
+* D: rampa de 1 us desde 0 (filtro RC)
+meas tran tD  when d=0 rise=LAST from=3100u to=3200u
+meas tran vD  find v(vdd) when d=0 rise=LAST from=3100u to=3200u
+meas tran xD  when d=0 rise=2 from=3100u to=3200u
+meas tran bD  find v(vdd) when d=0 rise=1 from=3100u to=3200u
+* E: corte de 10 us (caida y vuelta en 1 us): MDIS debe vaciar DELAY
+meas tran tE  when d=0 rise=LAST from=3211u to=3300u
+meas tran xE  when d=0 rise=2 from=3211u to=3300u
+meas tran bE  find v(vdd) when d=0 rise=1 from=3211u to=3300u
+* F, G, H: rampas 10 us, 100 us, 10 ms
+meas tran vF  find v(vdd) when d=0 rise=LAST from=3400u to=3500u
+meas tran xF  when d=0 rise=2 from=3400u to=3500u
+meas tran bF  find v(vdd) when d=0 rise=1 from=3400u to=3500u
+meas tran vG  find v(vdd) when d=0 rise=LAST from=3600u to=3800u
+meas tran xG  when d=0 rise=2 from=3600u to=3800u
+meas tran bG  find v(vdd) when d=0 rise=1 from=3600u to=3800u
+meas tran vH  find v(vdd) when d=0 rise=LAST from=3900u to=14000u
+meas tran xH  when d=0 rise=2 from=3900u to=14000u
+meas tran bH  find v(vdd) when d=0 rise=1 from=3900u to=14000u
+* blip = VDD del primer pulso solo si hubo una segunda subida; si no, 0
+let blA = bA*(xA gt 0)
+let blD = bD*(xD gt 0)
+let blE = bE*(xE gt 0)
+let blF = bF*(xF gt 0)
+let blG = bG*(xG gt 0)
+let blH = bH*(xH gt 0)
+let blmax = blA
+if blD > blmax
+  let blmax = blD
+end
+if blE > blmax
+  let blmax = blE
+end
+if blF > blmax
+  let blmax = blF
+end
+if blG > blmax
+  let blmax = blG
+end
+if blH > blmax
+  let blmax = blH
+end
+let dD = (tD - 3100u)*1e6
+let dE = (tE - 3211u)*1e6
+let iuA = -idd*1e6
+* veredictos (1 = PASS)
+let p_lvl  = (vA ge VREL_MIN)&(vA le VREL_MAX)&(vC ge VREL_MIN)&(vC le VREL_MAX)&(vF ge VREL_MIN)&(vF le VREL_MAX)&(vG ge VREL_MIN)&(vG le VREL_MAX)&(vH ge VREL_MIN)&(vH le VREL_MAX)
+let p_blip = (blmax le VBLIP_MAX)
+let p_dip  = (tB gt 0)
+let p_fast = (tD gt 3101u)
+let p_cut  = (dE ge 0.8*dD)&(tE gt 0)
+let p_idd  = (-idd le IDD_MAX)
+let pass = p_lvl & p_blip & p_dip & p_fast & p_cut & p_idd
+echo RESULT_BEGIN
+print vA vC vF vG vH vD dD dE iuA blmax
+print p_lvl p_blip p_dip p_fast p_cut p_idd pass
+echo RESULT_END
+if pass > 0.5
+  echo VEREDICTO: PASS
+else
+  echo VEREDICTO: FAIL
+end
+set wr_singlescale
+wrdata @OUT@ v(vdd) v(por_raw_n) v(xdut.delay) v(xdut.x) v(xdut.vok)
+.endc
+.end

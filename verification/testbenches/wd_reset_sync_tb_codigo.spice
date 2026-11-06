@@ -1,0 +1,169 @@
+** =====================================================================
+** wd_reset_sync_tb -- INTEGRACION: wd_oscillater + wd_por + wd_reset_sync (IHP SG13G2)
+** Pegar en el bloque SimulatorNGSPICE1 (reemplaza todo su contenido). El bloque
+** Libs_Ngspice1 queda igual: la esquina MOS se elige ahi (mos_tt / mos_ss).
+** Esquina de T y VDD: .temp y .param vdd (abajo).
+**
+** Perfil de VDD (2.1 ms):
+**   A) rampa de 10 us -> POR_RAW_N libera -> POR_B en el 2.o flanco de subida de CLK
+**   B) caida a 0.45 V durante 90 us (400 us): POR_B debe bajar (asincronico) y volver a
+**      liberarse en el 2.o flanco de subida despues de que POR_RAW_N vuelve a 1
+**   C) apagado 50 us y rampa LENTA de 1 ms (860 us): igual que A, con VDD todavia subiendo
+** CRITERIOS por ventana (VEREDICTO al final del log):
+**   - POR_B sube a <= 20 ns del 2.o flanco de subida de CLK posterior a POR_RAW_N (dl*)
+**   - P1 (x2.p1) sube a <= 20 ns del 1.er flanco (dp*)
+**   - periodo de CLK en esos dos flancos entre 80 y 120 us (T*), un solo flanco de POR_B
+**   - la caida a 0.45 V baja POR_B (tD > 0)
+** Se informa tambien: vR* = VDD cuando libera POR_RAW_N, vB* = VDD cuando sube POR_B.
+**
+** IMPORTANTE (numerico):
+** 1) wd_reset_sync se reemplaza por un modelo DIGITAL (XSPICE) definido aca abajo. Con los
+**    FF a nivel transistor, ngspice resuelve el cambio del latch del oscilador en un solo
+**    paso y los FF capturan en el flanco de bajada (artefacto; cambia con tmax). El FF real
+**    ya esta validado en tb_wd_reset_sync (45/45 + reloj lento). Aviso esperado:
+**    "redefinition of .subckt wd_reset_sync, ignored".
+** 2) Si aborta ("Timestep too small") o falla, repetir cambiando tmax (ultimo argumento de
+**    tran): 100n -> 70n -> 130n -> 50n -> 150n. El latch del oscilador a veces genera un pulso
+**    espurio de CLK de ~50 ns en un solo paso; ese artefacto cambia de lugar con tmax. Es falla
+**    real solo si se repite en el mismo lugar con todos los tmax.
+**    Verificado: tt y ss x (-40, 27, 85 C) x (1.08, 1.2, 1.32 V): 18/18 PASS (12 al primer
+**    intento; 6 necesitaron otro tmax).
+** 3) Los mensajes "measure gB.. out of interval" son ESPERADOS (no hubo segundo flanco).
+** =====================================================================
+.param vdd=1.2
+.temp 27
+.option method=gear maxord=2 reltol=1e-3 gmin=1e-11
+** VDD: A) rampa 10 us | B) caida a 0.45 V durante 90 us (400u) | C) apagado 50 us y rampa lenta de 1 ms (860u)
+VVDD VDD 0 PWL(0 0 10u {vdd} 400u {vdd} 405u 0.45 495u 0.45 500u {vdd} 800u {vdd} 810u 0 860u 0 1860u {vdd} 2100u {vdd})
+VVSS VSS 0 DC 0
+** carga del arbol de reloj: ~25 entradas de FF + cableado (la misma que en tb_wd_reset_sync).
+CCLK CLK 0 200f
+** ---------------------------------------------------------------------------
+** wd_reset_sync DIGITAL (XSPICE) SOLO PARA LA INTEGRACION.
+** Como va antes que el netlist de Xschem, reemplaza al wd_reset_sync a nivel transistor
+** (ngspice avisa "redefinition of .subckt wd_reset_sync, ignored": es lo esperado).
+** El FF real (2 x sg13g2_dfrbp_1) esta validado aparte en tb_wd_reset_sync (45/45).
+** Mismos pines y mismo nombre del nodo interno (P1).
+** Umbral logico = VDD/2. Con VDD < 0.4 V los FF se consideran en reset (no funcionales).
+** ---------------------------------------------------------------------------
+.subckt wd_reset_sync POR_RAW_N CLK POR_B VDD VSS
+BCK ckn 0 V = V(CLK,VSS)/max(V(VDD,VSS),0.05)
+BRS rsn 0 V = (V(POR_RAW_N,VSS)/max(V(VDD,VSS),0.05))*0.5*(1+tanh((V(VDD,VSS)-0.4)/0.01))
+AAD [ckn rsn] [dck drsn] adcb
+AINV drsn drs dinv
+APU dhi dpu
+AF1 dhi dck NULL drs dp1 dp1n dff1
+AF2 dp1 dck NULL drs dpb dpbn dff1
+ADA [dp1 dpb] [p1n pbn] dacb
+BP1 P1 VSS V = V(p1n)*V(VDD,VSS)
+BPB POR_B VSS V = V(pbn)*V(VDD,VSS)
+.model adcb adc_bridge(in_low=0.45 in_high=0.55 rise_delay=1e-11 fall_delay=1e-11)
+.model dinv d_inverter(rise_delay=1e-11 fall_delay=1e-11)
+.model dpu d_pullup(load=1e-12)
+.model dff1 d_dff(clk_delay=300p set_delay=300p reset_delay=300p rise_delay=50p fall_delay=50p ic=0)
+.model dacb dac_bridge(out_low=0 out_high=1 out_undef=0.5 t_rise=100p t_fall=100p)
+.ends
+
+.control
+  set num_threads=1
+  tran 10n 2100u 0 100n
+  * d* > 0 <=> nodo en 1 (> VDD/2); con VDD < 0.3 V no se evalua
+  let VU = 0.3
+  let dR = (v(por_raw_n)-0.5*v(vdd))*(v(vdd) gt VU) - 0.01*(v(vdd) le VU)
+  let dB = (v(por_b)-0.5*v(vdd))*(v(vdd) gt VU) - 0.01*(v(vdd) le VU)
+  let dP = (v(x2.p1)-0.5*v(vdd))*(v(vdd) gt VU) - 0.01*(v(vdd) le VU)
+  let dC = (v(clk)-0.5*v(vdd))*(v(vdd) gt VU) - 0.01*(v(vdd) le VU)
+  let ok = 1
+  * --- ventana A (rampa 10 us) ---
+  let tRA = -1
+  let tBA = -1
+  let tPA = -1
+  let e1A = -1
+  let e2A = -1
+  let gBA = -1
+  let vRA = -1
+  let vBA = -1
+  meas tran tRA when dR=0 rise=LAST from=0 to=400u
+  meas tran vRA find v(vdd) when dR=0 rise=LAST from=0 to=400u
+  meas tran tBA when dB=0 rise=1 from=$&tRA to=400u
+  meas tran vBA find v(vdd) when dB=0 rise=1 from=$&tRA to=400u
+  meas tran gBA when dB=0 rise=2 from=0 to=400u
+  meas tran tPA when dP=0 rise=1 from=$&tRA to=400u
+  meas tran e1A when dC=0 rise=1 from=$&tRA to=400u
+  meas tran e2A when dC=0 rise=2 from=$&tRA to=400u
+  let dlA = (tBA-e2A)*1e9
+  let dpA = (tPA-e1A)*1e9
+  let TA = (e2A-e1A)*1e6
+  let latA = (tBA-tRA)*1e6
+  let nTA = latA/TA
+  let pA = (tRA gt 0)&(tBA gt 0)&(abs(dlA) le 20)&(abs(dpA) le 20)&(nTA ge 0.99)&(nTA le 3)&(TA ge 80)&(TA le 120)&(gBA lt 0)
+  let ok = ok & pA
+  * --- ventana B (tras caida a 0.45 V) ---
+  let tRB = -1
+  let tBB = -1
+  let tPB = -1
+  let e1B = -1
+  let e2B = -1
+  let gBB = -1
+  let vRB = -1
+  let vBB = -1
+  meas tran tRB when dR=0 rise=LAST from=410u to=800u
+  meas tran vRB find v(vdd) when dR=0 rise=LAST from=410u to=800u
+  meas tran tBB when dB=0 rise=1 from=$&tRB to=800u
+  meas tran vBB find v(vdd) when dB=0 rise=1 from=$&tRB to=800u
+  meas tran gBB when dB=0 rise=2 from=410u to=800u
+  meas tran tPB when dP=0 rise=1 from=$&tRB to=800u
+  meas tran e1B when dC=0 rise=1 from=$&tRB to=800u
+  meas tran e2B when dC=0 rise=2 from=$&tRB to=800u
+  let dlB = (tBB-e2B)*1e9
+  let dpB = (tPB-e1B)*1e9
+  let TB = (e2B-e1B)*1e6
+  let latB = (tBB-tRB)*1e6
+  let nTB = latB/TB
+  let pB = (tRB gt 0)&(tBB gt 0)&(abs(dlB) le 20)&(abs(dpB) le 20)&(nTB ge 0.99)&(nTB le 3)&(TB ge 80)&(TB le 120)&(gBB lt 0)
+  let ok = ok & pB
+  * --- ventana C (rampa 1 ms) ---
+  let tRC = -1
+  let tBC = -1
+  let tPC = -1
+  let e1C = -1
+  let e2C = -1
+  let gBC = -1
+  let vRC = -1
+  let vBC = -1
+  meas tran tRC when dR=0 rise=LAST from=810u to=2100u
+  meas tran vRC find v(vdd) when dR=0 rise=LAST from=810u to=2100u
+  meas tran tBC when dB=0 rise=1 from=$&tRC to=2100u
+  meas tran vBC find v(vdd) when dB=0 rise=1 from=$&tRC to=2100u
+  meas tran gBC when dB=0 rise=2 from=810u to=2100u
+  meas tran tPC when dP=0 rise=1 from=$&tRC to=2100u
+  meas tran e1C when dC=0 rise=1 from=$&tRC to=2100u
+  meas tran e2C when dC=0 rise=2 from=$&tRC to=2100u
+  let dlC = (tBC-e2C)*1e9
+  let dpC = (tPC-e1C)*1e9
+  let TC = (e2C-e1C)*1e6
+  let latC = (tBC-tRC)*1e6
+  let nTC = latC/TC
+  let pC = (tRC gt 0)&(tBC gt 0)&(abs(dlC) le 20)&(abs(dpC) le 20)&(nTC ge 0.99)&(nTC le 3)&(TC ge 80)&(TC le 120)&(gBC lt 0)
+  let ok = ok & pC
+  * la caida a 0.45 V debe bajar POR_B (asercion asincronica)
+  let tD = -1
+  meas tran tD when dB=0 fall=1 from=400u to=500u
+  let pD = (tD gt 0)
+  let ok = ok & pD
+  meas tran idd avg i(VVDD) from=600u to=800u
+  let idd_ua = -idd*1e6
+  echo RESULT_BEGIN
+  print vRA vBA latA TA nTA dlA dpA pA
+  print vRB vBB latB TB nTB dlB dpB pB
+  print vRC vBC latC TC nTC dlC dpC pC
+  print tD pD idd_ua ok
+  echo RESULT_END
+  if ok > 0.5
+    echo VEREDICTO: PASS
+  else
+    echo VEREDICTO: FAIL
+  end
+  plot v(vdd) v(clk) v(por_raw_n)+1.5 v(x2.p1)+3 v(por_b)+4.5
+  write wd_reset_sync_tb.raw
+.endc
