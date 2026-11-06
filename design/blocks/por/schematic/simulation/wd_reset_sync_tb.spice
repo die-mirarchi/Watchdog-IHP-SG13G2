@@ -1,0 +1,285 @@
+** sch_path: /workspace/design/blocks/por/schematic/wd_reset_sync_tb.sch
+**.subckt wd_reset_sync_tb
+x1 POR_RAW_N VDD VSS wd_por
+x2 POR_RAW_N CLK POR_B VDD VSS wd_reset_sync
+x3 CLK VDD VSS wd_oscillater
+C1 POR_B VSS 50f
+**** begin user architecture code
+
+
+
+.lib cornerMOSlv.lib mos_tt
+.lib cornerMOShv.lib mos_tt
+.lib cornerHBT.lib hbt_typ
+.lib cornerRES.lib res_typ
+.lib cornerDIO.lib dio_tt
+.lib cornerCAP.lib cap_typ
+
+
+
+
+
+.param vdd=1.2
+.temp 27
+.option method=gear maxord=2 reltol=1e-3
+** fuentes
+VVDD VDD 0 PULSE(0 {vdd} 1u 1u 0.1u 300u 600u)
+VVSS VSS 0 DC 0
+.control
+  set num_threads=1
+  * ---- TRAN ----
+  tran 50n 310u
+  let idd = -1
+  meas tran idd AVG i(VVDD)
+  let idd_ua = -1
+  if (idd ne -1)
+    let idd_ua = -idd*1e6
+  end
+  echo '  idd_ua = $&idd_ua'
+  plot v(VDD)
+  plot -i(VVDD)*1e6
+  write wd_reset_sync_tb.raw
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  wd_por.sym # of pins=1
+** sym_path: /workspace/design/blocks/por/schematic/wd_por.sym
+** sch_path: /workspace/design/blocks/por/schematic/wd_por.sch
+.subckt wd_por POR_RAW_N VDD VSS
+*.opin POR_RAW_N
+XR1 VDD net1 VSS rhigh w=0.5e-6 l=360e-6 m=1 b=0 mm_ok=1
+XR2 net1 VSS VSS rhigh w=0.5e-6 l=385e-6 m=1 b=0 mm_ok=1
+XM1 net2 net1 VSS VSS sg13_lv_nmos w=0.3u l=9.9u ng=1 m=1 mm_ok=1
+x1 net4 net2 VDD VSS sg13g2_inv_1
+XR3 VDD net3 VSS rhigh w=0.5e-6 l=65e-6 m=1 b=0 mm_ok=1
+XC1 net3 VSS cap_cmim w=64.0e-6 l=64.0e-6 m=1 mm_ok=1
+XM3 net3 VDD VDD VDD sg13_lv_pmos w=2u l=0.13u ng=1 m=1 mm_ok=1
+x2 POR_RAW_N net3 net4 VDD VSS sg13g2_and2_1
+XR4 VDD net2 VSS rhigh w=0.5e-6 l=675e-6 m=1 b=0 mm_ok=1
+.ends
+
+
+* expanding   symbol:  wd_reset_sync.sym # of pins=3
+** sym_path: /workspace/design/blocks/por/schematic/wd_reset_sync.sym
+** sch_path: /workspace/design/blocks/por/schematic/wd_reset_sync.sch
+.subckt wd_reset_sync POR_RAW_N CLK POR_B VDD VSS
+*.opin POR_B
+*.ipin CLK
+*.ipin POR_RAW_N
+x1 net1 net2 CLK VDD POR_RAW_N VDD VSS sg13g2_dfrbp_1
+x2 POR_B net3 CLK net1 POR_RAW_N VDD VSS sg13g2_dfrbp_1
+.ends
+
+
+* expanding   symbol:  wd_oscillater.sym # of pins=1
+** sym_path: /workspace/design/blocks/oscillator/schematic/wd_oscillater.sym
+** sch_path: /workspace/design/blocks/oscillator/schematic/wd_oscillater.sch
+.subckt wd_oscillater CLK VDD VSS
+*.opin CLK
+x1 net2 net1 VDD VSS bias
+x2 net2 VL VC SET VDD VSS comp_inf
+x3 net1 VC VH RST VDD VSS comp_sup
+XR1 VDD VH VSS rhigh w=1e-6 l=150.0e-6 m=1 b=0 mm_ok=1
+XR2 VH VL VSS rhigh w=1e-6 l=150.0e-6 m=1 b=0 mm_ok=1
+XR3 VL VSS VSS rhigh w=1e-6 l=150.0e-6 m=1 b=0 mm_ok=1
+x4 NCHG SET CHG VDD VSS sg13g2_nor2_1
+x5 CHG RST NCHG VDD VSS sg13g2_nor2_1
+x6 DRIVE CHG VDD VSS sg13g2_buf_1
+x7 CLK CHG VDD VSS sg13g2_buf_4
+XR4 VC DRIVE VSS rppd w=0.5e-6 l=175.5e-6 m=1 b=15 mm_ok=1
+XC1 VH VSS cap_cmim w=20.0e-6 l=20.0e-6 m=1 mm_ok=1
+XC3 VL VSS cap_cmim w=20.0e-6 l=20.0e-6 m=1 mm_ok=1
+XC4 VC VSS cap_cmim w=64.0e-6 l=64.0e-6 m=8 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_inv_1.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_inv_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_inv_1.sch
+.subckt sg13g2_inv_1 Y A VDD VSS
+
+*.opin Y
+*.ipin A
+XM1 Y A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 Y A VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_and2_1.sym # of pins=3
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_and2_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_and2_1.sch
+.subckt sg13g2_and2_1 X A B VDD VSS
+
+*.ipin A
+*.ipin B
+*.opin X
+XM1 net1 A net2 VSS sg13_lv_nmos w=640.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 net2 B VSS VSS sg13_lv_nmos w=640.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 X net1 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM4 net1 B VDD VDD sg13_lv_pmos w=840.00n l=130.00n ng=1 m=1 mm_ok=1
+XM5 net1 A VDD VDD sg13_lv_pmos w=840.00n l=130.00n ng=1 m=1 mm_ok=1
+XM6 X net1 VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_dfrbp_1.sym # of pins=5
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_dfrbp_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_dfrbp_1.sch
+.subckt sg13g2_dfrbp_1 Q Q_N CLK D RESET_B VDD VSS
+
+*.ipin D
+*.ipin RESET_B
+*.ipin CLK
+*.opin Q
+*.opin Q_N
+XM1 Db D net12 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 net12 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net2 clkneg net11 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM4 net11 net1 VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM5 net1 net2 net7 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM6 net7 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM7 Q_N net2 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM8 net3 net2 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM9 Q net3 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM10 clkneg CLK VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM11 clkpos clkneg VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM12 Db clkneg net5 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM13 net5 clkpos net10 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM14 net10 net4 net6 VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM15 net6 RESET_B VSS VSS sg13_lv_nmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM16 net4 net5 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM17 net4 clkpos net2 VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM18 Db RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM19 Db D VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM20 net9 net1 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM21 net2 clkpos net9 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM22 net1 net2 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM23 net1 RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM24 Q_N net2 VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM25 net3 net2 VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM26 Q net3 VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM27 clkneg CLK VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM28 clkpos clkneg VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM29 Db clkpos net5 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM30 net8 net4 VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM31 net5 clkneg net8 VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM32 net5 RESET_B VDD VDD sg13_lv_pmos w=420.00n l=130.00n ng=1 m=1 mm_ok=1
+XM33 net4 net5 VDD VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+XM34 net4 clkneg net2 VDD sg13_lv_pmos w=1.000u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  bias.sym # of pins=2
+** sym_path: /workspace/design/blocks/bias/schematic/bias.sym
+** sch_path: /workspace/design/blocks/bias/schematic/bias.sch
+.subckt bias VBP VBN VDD VSS
+*.opin VBP
+*.opin VBN
+XM1 VBN VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM2 VBP VBP VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XR1 VDD VBN VSS rhigh w=0.5e-6 l=237.0e-6 m=1 b=0 mm_ok=1
+XC1 VBN VSS cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+XC2 VDD VBP cap_cmim w=26.0e-6 l=26.0e-6 m=1 mm_ok=1
+XM3 VBP VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  comp_inf.sym # of pins=4
+** sym_path: /workspace/design/blocks/comparator/schematic/comp_inf.sym
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_inf.sch
+.subckt comp_inf VBP VP VN OUT VDD VSS
+*.opin OUT
+*.ipin VN
+*.ipin VP
+*.ipin VBP
+XM1 net3 VBP VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XM7 net4 VP net3 VDD sg13_lv_pmos w=20u l=1u ng=4 m=1 mm_ok=1
+XM8 net1 VN net3 VDD sg13_lv_pmos w=20u l=1u ng=4 m=1 mm_ok=1
+XM9 net4 net4 VSS VSS sg13_lv_nmos w=1u l=8u ng=1 m=1 mm_ok=1
+XM10 net1 net4 VSS VSS sg13_lv_nmos w=1u l=8u ng=1 m=1 mm_ok=1
+XM2 net2 VBP VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XM3 net2 net1 VSS VSS sg13_lv_nmos w=2u l=8u ng=1 m=1 mm_ok=1
+x1 net2 OUT VDD VSS schmitt
+.ends
+
+
+* expanding   symbol:  comp_sup.sym # of pins=4
+** sym_path: /workspace/design/blocks/comparator/schematic/comp_sup.sym
+** sch_path: /workspace/design/blocks/comparator/schematic/comp_sup.sch
+.subckt comp_sup VBN VP VN OUT VDD VSS
+*.opin OUT
+*.ipin VN
+*.ipin VP
+*.ipin VBN
+XM2 net1 net1 VDD VDD sg13_lv_pmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM3 net3 net1 VDD VDD sg13_lv_pmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM4 net1 VP net2 VSS sg13_lv_nmos w=20u l=2u ng=4 m=1 mm_ok=1
+XM5 net3 VN net2 VSS sg13_lv_nmos w=20u l=2u ng=4 m=1 mm_ok=1
+XM6 net2 VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+XM1 net4 net3 VDD VDD sg13_lv_pmos w=4u l=4u ng=1 m=1 mm_ok=1
+XM7 net4 VBN VSS VSS sg13_lv_nmos w=2u l=4u ng=1 m=1 mm_ok=1
+x1 net4 OUT VDD VSS schmitt
+.ends
+
+
+* expanding   symbol:  sg13g2_nor2_1.sym # of pins=3
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_nor2_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_nor2_1.sch
+.subckt sg13g2_nor2_1 Y A B VDD VSS
+
+*.opin Y
+*.ipin B
+*.ipin A
+XM1 Y A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 Y B VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net1 A VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+XM4 Y B net1 VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_buf_1.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_buf_1.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_buf_1.sch
+.subckt sg13g2_buf_1 X A VDD VSS
+
+*.ipin A
+*.opin X
+XM1 net1 A VSS VSS sg13_lv_nmos w=550.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 X net1 VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM3 net1 A VDD VDD sg13_lv_pmos w=840.00n l=130.00n ng=1 m=1 mm_ok=1
+XM4 X net1 VDD VDD sg13_lv_pmos w=1.12u l=130.00n ng=1 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  sg13g2_buf_4.sym # of pins=2
+** sym_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/xschem/sg13g2_buf_4.sym
+** sch_path: /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/sch/xschem/sg13g2_buf_4.sch
+.subckt sg13g2_buf_4 X A VDD VSS
+
+*.ipin A
+*.opin X
+XM1 net1 A VSS VSS sg13_lv_nmos w=740.00n l=130.00n ng=1 m=1 mm_ok=1
+XM2 X net1 VSS VSS sg13_lv_nmos w=2.96u l=130.00n ng=4 m=1 mm_ok=1
+XM3 net1 A VDD VDD sg13_lv_pmos w=1.68u l=130.00n ng=2 m=1 mm_ok=1
+XM4 X net1 VDD VDD sg13_lv_pmos w=4.48u l=130.00n ng=4 m=1 mm_ok=1
+.ends
+
+
+* expanding   symbol:  schmitt.sym # of pins=2
+** sym_path: /workspace/design/blocks/schmitt/schematic/schmitt.sym
+** sch_path: /workspace/design/blocks/schmitt/schematic/schmitt.sch
+.subckt schmitt IN OUT VDD VSS
+*.opin OUT
+*.ipin IN
+XM4 net1 IN VDD VDD sg13_lv_pmos w=1.04u l=0.13u ng=1 m=1 mm_ok=1
+XM6 OUT IN net2 VSS sg13_lv_nmos w=0.76u l=0.13u ng=1 m=1 mm_ok=1
+XM5 OUT IN net1 VDD sg13_lv_pmos w=1.04u l=0.13u ng=1 m=1 mm_ok=1
+XM7 net2 IN VSS VSS sg13_lv_nmos w=0.76u l=0.13u ng=1 m=1 mm_ok=1
+XM8 VSS OUT net1 VDD sg13_lv_pmos w=0.42u l=0.13u ng=1 m=1 mm_ok=1
+XM9 VDD OUT net2 VSS sg13_lv_nmos w=0.42u l=0.13u ng=1 m=1 mm_ok=1
+.ends
+
+.end
