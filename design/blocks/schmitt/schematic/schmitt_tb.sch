@@ -5,7 +5,7 @@ V {}
 S {}
 F {}
 E {}
-N 340 60 370 60 {lab=OUT}
+N 220 60 250 60 {lab=OUT}
 N 20 60 40 60 {lab=IN}
 C {simulator_commands_shown.sym} -390 -130 0 0 {
 name=Libs_Ngspice
@@ -84,6 +84,6 @@ echo listo >> schmitt_report.txt
 shell cat schmitt_report.txt
 .endc
 "}
-C {devices/lab_pin.sym} 370 60 0 1 {name=l_EDGE lab=OUT}
+C {devices/lab_pin.sym} 250 60 0 1 {name=l_EDGE lab=OUT}
 C {devices/lab_pin.sym} 20 60 0 0 {name=l_EDGE1 lab=IN}
 C {schmitt.sym} 190 60 0 0 {name=x1 VDD=VDD VSS=VSS}
