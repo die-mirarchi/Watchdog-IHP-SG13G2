@@ -1,0 +1,36 @@
+counter17 -- resultados de verificacion (12/11/2026)
+=====================================================
+Como se simula (celda digital):
+ 1) Nivel transistor (ngspice, counter17_tb.sch -> counter17_tb.spice):
+    51 ciclos a 50 MHz: cuenta en Q0..Q5 ciclo a ciclo, CLR sincronico,
+    POR_B asincronico, tCQ, y que T00/T10/T01 no tengan glitches con Q10_N = 1.
+    ~1 min por caso (9 casos por esquina MOS). Llegar a T01 (1024 ciclos) a
+    nivel transistor tarda > 10 min por caso, y T00/T10 son 10x y 100x mas.
+ 2) Logica (Icarus + modelos Verilog de IHP, counter17_logic_tb.v):
+    netlist exportado de xschem -> spice2v.py -> Verilog estructural con las
+    mismas instancias. Recorre las 131 072 cuentas y compara T00, T10, T01 y
+    Q10_N con un contador de referencia en cada ciclo; CLR, POR_B y vuelta a 0.
+    Corre en segundos:  sh run_logic.sh counter17   (con PDK_ROOT definido)
+
+Esquematico del repo (commit 9e7b63d), TAL CUAL:  FAIL
+ - El pin T01 no esta conectado: el cable de la salida Q de x11 tiene las
+   etiquetas Q10 y T01 a la vez; xschem avisa "Net shorted: T01 - Q10" y el
+   netlist usa Q10, asi que el pin T01 queda flotando (T01 = z en Icarus;
+   tomas=0 en ngspice). CORRECCION: dejar una sola etiqueta (T01) en ese cable.
+
+Con esa correccion:
+ - Icarus: PASS. Primera subida T01 = 1024, T00 = 10240, T10 = 102400; las
+   131 077 cuentas coinciden con la referencia; CLR y POR_B correctos.
+ - ngspice mos_tt y mos_ss x (-40, 27, 85 C) x (1,08, 1,2, 1,32 V): 18/18 PASS.
+   cuenta 51/51; tCQ del bit 0 = 0,22-0,40 ns; POR_B -> Q = 0,21-0,37 ns.
+   ss/27/1,08 aborto una vez con tmax 0,5 ns y paso con el reintento a 0,25 ns.
+
+ACTUALIZACION (12/11/2026, esquematico corregido: una sola etiqueta T01 en la salida de x11)
+ - xschem exporta sin avisos; T01 conectado a la salida Q del bit 10.
+ - Icarus (counter17_logic_tb.v sobre el netlist exportado): PASS. Las 131 077 cuentas
+   coinciden con la referencia; primera subida T01 = 1024, T00 = 10240, T10 = 102400;
+   CLR sincronico y POR_B asincronico correctos.
+ - ngspice con counter17_tb.spice exportado de xschem (sin modificar):
+   mos_tt 9/9 PASS, mos_ss 9/9 PASS. tCQ 0,22-0,40 ns; POR_B -> Q 0,21-0,37 ns.
+   ss/27/1,08 aborto una vez con tmax 0,5 ns y paso con el reintento a 0,25 ns.
+   ~11 min por esquina (9 casos).

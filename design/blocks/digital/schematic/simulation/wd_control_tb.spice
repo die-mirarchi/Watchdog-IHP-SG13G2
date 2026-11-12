@@ -1,0 +1,207 @@
+** sch_path: /workspace/design/blocks/digital/schematic/wd_control_tb.sch
+**.subckt wd_control_tb
+x1 WDI_EDGE Q10_N T00 T10 CLK T01 HI ACTIVE SET1 BOOT CLR SET0 RESET POR_B VDD VSS wd_control
+xb0 C0 POR_B CLK HI CLR Q0 Q0_N VDD VSS one_bit
+xb1 C1 POR_B CLK C0 CLR T01 Q10_N VDD VSS one_bit
+xb2 C2 POR_B CLK C1 CLR Q2 Q2_N VDD VSS one_bit
+xb3 C3 POR_B CLK C2 CLR Q3 Q3_N VDD VSS one_bit
+xb4 C4 POR_B CLK C3 CLR Q4 Q4_N VDD VSS one_bit
+xb5 C5 POR_B CLK C4 CLR Q5 Q5_N VDD VSS one_bit
+xt0 T00 Q3 Q2 VDD VSS sg13g2_and2_1
+xt1 T10 Q5 Q4 Q2 VDD VSS sg13g2_and3_1
+xth HI VDD VSS sg13g2_tiehi
+**** begin user architecture code
+
+
+
+.lib cornerMOSlv.lib mos_tt
+.lib cornerMOShv.lib mos_tt
+.lib cornerHBT.lib hbt_typ
+.lib cornerRES.lib res_typ
+.lib cornerDIO.lib dio_tt
+.lib cornerCAP.lib cap_typ
+
+
+
+
+
+
+* ============================================================
+* wd_control_tb -- validacion a nivel transistor de wd_control (IHP SG13G2)
+* Lazo cerrado con un contador ESCALADO de 6 bits hecho con one_bit (celdas reales):
+*   T01 = Q1 (cuenta 2), T00 = Q3&Q2 (12), T10 = Q5&Q4&Q2 (52), Q10_N = Q1_N
+*   -> pulso de reset 3 T, timeouts 13 / 3 / 53 T (SET = 00 / 01 / 10), arranque 53 T.
+* Las constantes reales (1025 / 10241 / 102401 T) se verifican en Icarus con el
+* netlist exportado (wd_control_logic_tb.v).
+* Corner MOS: editar la linea .lib (mos_tt / mos_ss / ...)
+* Barre T = -40/27/85 C  x  VDD = 1.08/1.2/1.32 V dentro de .control
+* CLK 10 MHz: flancos de subida en 50n + k*100n; entradas cambian en 20n + k*100n.
+* WDI_EDGE se da como pulsos de un ciclo (lo que entrega WDI_INPUT).
+* Fases: A SET=00 (arranque sin WDI -> pulso -> WDI -> timeout normal)
+*        B SET=01 (WDI en arranque -> timeout de 3 T; WDI en el ultimo ciclo es valido)
+*        C SET=10 (WDI -> 53 T; SET cambiado en marcha a 11 no tiene efecto)
+*        D SET=11 (deshabilitado, con WDI)
+* Eventos esperados de RESET (subida/bajada, +-2 ns): 5350/5650, 7350/7650,
+* 9050/9350, 15350/15650 ns; sin un quinto pulso. ACTIVE y BOOT en 6 instantes.
+.global VDD VSS
+.param vdd=1.2
+
+* ---- contador escalado (6 x one_bit) y tomas: dibujados en el esquematico ----
+
+* ---------- fuentes y cargas ----------
+CRS RESET 0 10f
+CAC ACTIVE 0 10f
+CBT BOOT 0 10f
+V_VDD VDD 0 PWL(0 0 100n {vdd})
+V_VSS VSS 0 0
+V_CLK CLK 0 PULSE(0 {vdd} 50n 0.1n 0.1n 50n 100n)
+V_POR POR_B 0 PWL(0 0 120n 0 120.01n {vdd} 8020n {vdd} 8020.01n 0 8220n 0 8220.01n {vdd} 9720n {vdd}
++ 9720.01n 0 9920n 0 9920.01n {vdd} 15720n {vdd} 15720.01n 0 15920n 0 15920.01n {vdd})
+V_S0 SET0 0 PWL(0 0 8020n 0 8020.01n {vdd} 9720n {vdd} 9720.01n 0 10520n 0 10520.01n {vdd} 15720n {vdd}
++ 15720.01n {vdd})
+V_S1 SET1 0 PWL(0 0 9720n 0 9720.01n {vdd} 15720n {vdd} 15720.01n {vdd})
+V_WDI WDI_EDGE 0 PWL(0 0 6020n 0 6020.01n {vdd} 6120n {vdd} 6120.01n 0 8420n 0 8420.01n {vdd} 8520n {vdd}
++ 8520.01n 0 8720n 0 8720.01n {vdd} 8820n {vdd} 8820.01n 0 10020n 0 10020.01n {vdd} 10120n {vdd} 10120.01n
++ 0 16520n 0 16520.01n {vdd} 16620n {vdd} 16620.01n 0)
+.option method=gear maxord=2 reltol=1e-3
+* guardar solo lo necesario: con todos los nodos ngspice acumula ~3 GB en 9 casos
+.save v(clk) v(por_b) v(set0) v(set1) v(wdi_edge) v(active) v(boot) v(reset)
+.control
+set noaskquit
+compose tlist values -40 27 85
+compose vlist values 1.08 1.2 1.32
+compose rexp values 5350n 7350n 9050n 15350n
+compose fexp values 5650n 7650n 9350n 15650n
+let npass = 0
+let ncase = 0
+let it = 0
+while it lt 3
+ let iv = 0
+ while iv lt 3
+  let tt = tlist[it]
+  let vv = vlist[iv]
+  alterparam vdd = $&vv
+  reset
+  option temp = $&tt
+  tran 0.1n 21000n 0 0.5n
+  let nt = length(time)
+  let tend = time[nt-1]
+  if tend lt 20990n
+   echo REINTENTO T=$&tt VDD=$&vv (aborto en t=$&tend)
+   reset
+   option temp = $&tt
+   tran 0.05n 21000n 0 0.25n
+  end
+  let vh = vv/2
+  let ok = 0
+  let k = 0
+  while k lt 4
+   let kk = k + 1
+   let tr = -1
+   let tf = -1
+   meas tran tr WHEN v(reset)=$&vh RISE=$&kk
+   meas tran tf WHEN v(reset)=$&vh FALL=$&kk
+   let er = abs(tr - rexp[k]) lt 2n
+   let ef = abs(tf - fexp[k]) lt 2n
+   if er & ef
+    let ok = ok + 1
+   else
+    echo   evento $&kk : subida=$&tr bajada=$&tf
+   end
+   let k = k + 1
+  end
+  let r5 = -1
+  meas tran r5 WHEN v(reset)=$&vh RISE=5
+  meas tran a03 FIND v(active) AT=300n
+  meas tran b03 FIND v(boot) AT=300n
+  meas tran b70 FIND v(boot) AT=7000n
+  meas tran b79 FIND v(boot) AT=7900n
+  meas tran a18 FIND v(active) AT=18000n
+  meas tran a20 FIND v(active) AT=20500n
+  let lv = (a03 gt vh) & (b03 gt vh) & (b70 lt vh) & (b79 gt vh) & (a18 lt vh) & (a20 lt vh)
+  let pass = (ok eq 4) & (r5 lt 0) & lv
+  if pass > 0.5
+   echo CASO T=$&tt VDD=$&vv : PASS  4/4 eventos de RESET a +-2 ns, niveles ok
+   let npass = npass + 1
+  else
+   echo CASO T=$&tt VDD=$&vv : FAIL  eventos=$&ok/4 sin5=$&r5 niveles=$&lv
+  end
+  set wr_singlescale
+  wrdata wd_control_{$&tt}_{$&vv}.txt v(clk) v(por_b) v(set0) v(set1) v(wdi_edge) v(active) v(boot) v(reset)
+  destroy all
+  let ncase = ncase + 1
+  let iv = iv + 1
+ end
+ let it = it + 1
+end
+echo ===============================================
+echo RESUMEN: $&npass / $&ncase casos PASS
+if npass eq ncase
+ echo VEREDICTO: PASS
+else
+ echo VEREDICTO: FAIL
+end
+.endc
+.end
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  wd_control.sym # of pins=14
+** sym_path: /workspace/design/blocks/digital/schematic/wd_control.sym
+** sch_path: /workspace/design/blocks/digital/schematic/wd_control.sch
+.subckt wd_control WDI_EDGE Q10_N T00 T10 CLK T01 HI ACTIVE SET1 BOOT CLR SET0 RESET POR_B VDD VSS
+*.ipin POR_B
+*.ipin SET0
+*.opin CLR
+*.opin RESET
+*.ipin SET1
+*.ipin HI
+*.ipin T01
+*.opin ACTIVE
+*.opin BOOT
+*.ipin CLK
+*.ipin T10
+*.ipin T00
+*.ipin Q10_N
+*.ipin WDI_EDGE
+x1 CFG0 SET0 POR_B HI VDD VSS sg13g2_dllrq_1
+x2 CFG1 SET1 POR_B HI VDD VSS sg13g2_dllrq_1
+x4 DIS CFG0 CFG1 VDD VSS sg13g2_and2_2
+x3 NBA WDI_EDGE ACTIVE NB VDD VSS sg13g2_a21o_1
+x5 NBD NBA RS_N VDD VSS sg13g2_and2_1
+x6 NB BOOT CLK NBD POR_B VDD VSS sg13g2_dfrbp_1
+x7 OR3 DIS WDI_EDGE HIT VDD VSS sg13g2_or3_1
+x8 net1 OR3 T01 RESET VDD VSS sg13g2_mux2_2
+x9 CLR net1 VDD VSS sg13g2_buf_16
+x10 TON T00 T01 T10 LO CFG0 CFG1 VDD VSS sg13g2_mux4_1
+x11 TO T10 TON NB VDD VSS sg13g2_mux2_1
+x12 HIT ACTIVE TO WE_N VDD VSS sg13g2_and3_2
+x13 WE_N WDI_EDGE VDD VSS sg13g2_inv_1
+x14 ACTIVE DIS RESET VDD VSS sg13g2_nor2_2
+x15 RSD RESET Q10_N HIT VDD VSS sg13g2_a21o_1
+x16 RESET RS_N CLK RSD POR_B VDD VSS sg13g2_dfrbp_2
+x17 LO VDD VSS sg13g2_tielo
+.ends
+
+
+* expanding   symbol:  one_bit.sym # of pins=7
+** sym_path: /workspace/design/blocks/counter_bit/schematic/one_bit.sym
+** sch_path: /workspace/design/blocks/counter_bit/schematic/one_bit.sch
+.subckt one_bit CO POR_B CLK CI CLR Q Q_N VDD VSS
+*.opin CO
+*.ipin CLK
+*.ipin POR_B
+*.ipin CLR
+*.ipin CI
+*.opin Q
+*.opin Q_N
+x1 Q Q_N CLK D POR_B VDD VSS sg13g2_dfrbp_1
+x2 D INC NCLR VDD VSS sg13g2_and2_1
+x3 INC Q CI VDD VSS sg13g2_xor2_1
+x4 NCLR CLR VDD VSS sg13g2_inv_1
+x5 CO CI Q VDD VSS sg13g2_and2_1
+.ends
+
+.end
