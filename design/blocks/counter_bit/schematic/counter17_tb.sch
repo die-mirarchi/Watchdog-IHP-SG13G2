@@ -5,15 +5,15 @@ V {}
 S {}
 F {}
 E {}
-N 470 -30 450 -30 {lab=T00}
+N 450 -30 470 -30 {lab=T00}
 N 130 -30 150 -30 {lab=HI}
-N 470 -10 450 -10 {lab=T10}
+N 450 -10 470 -10 {lab=T10}
 N 130 -10 150 -10 {lab=CLK}
 N 130 10 150 10 {lab=CLR}
-N 470 10 450 10 {lab=T01}
-N 470 30 450 30 {lab=Q10_N}
+N 450 10 470 10 {lab=T01}
+N 450 30 470 30 {lab=Q10_N}
 N 130 30 150 30 {lab=POR_B}
-C {simulator_commands_shown.sym} -460 -260 0 0 {
+C {simulator_commands_shown.sym} -490 -440 0 0 {
 name=Libs_Ngspice
 simulator=ngspice
 only_toplevel=false
