@@ -35,6 +35,8 @@ N -360 -140 -360 -10 {lab=CI}
 N -360 -10 -310 -10 {lab=CI}
 N -310 -10 -310 -0 {lab=CI}
 N -220 -120 -210 -120 {lab=CO}
+N 70 -160 90 -160 {lab=CO}
+N 70 -130 90 -130 {lab=CO}
 C {sg13g2_dfrbp_1.sym} 120 0 0 0 {name=x1 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {opin.sym} 90 -190 0 0 {name=p5 lab=CO}
 C {lab_pin.sym} 70 -190 0 0 {name=p7 sig_type=std_logic lab=CO
@@ -74,4 +76,10 @@ C {lab_pin.sym} -20 -20 0 1 {name=p19 sig_type=std_logic lab=D
 }
 C {sg13g2_and2_1.sym} -280 -120 0 0 {name=x5 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {lab_pin.sym} -210 -120 0 1 {name=p20 sig_type=std_logic lab=CO
+}
+C {opin.sym} 90 -160 0 0 {name=p21 lab=Q}
+C {lab_pin.sym} 70 -160 0 0 {name=p22 sig_type=std_logic lab=Q
+}
+C {opin.sym} 90 -130 0 0 {name=p23 lab=Q_N}
+C {lab_pin.sym} 70 -130 0 0 {name=p24 sig_type=std_logic lab=Q_N
 }
