@@ -1,0 +1,32 @@
+v {xschem version=3.4.8RC file_version=1.3}
+G {}
+K {type=subcircuit
+format="@name @pinlist @symname"
+spectre_format="@name ( @pinlist ) @symname"
+template="name=x1"
+}
+V {}
+S {}
+F {}
+E {}
+L 4 -150 -20 -130 -20 {}
+L 4 -150 0 -130 0 {}
+L 4 -150 20 -130 20 {}
+L 4 130 0 150 0 {}
+L 4 0 -60 0 -40 {}
+L 4 0 40 0 60 {}
+B 5 -152.5 -22.5 -147.5 -17.5 {name=SET1 dir=in}
+B 5 -152.5 -2.5 -147.5 2.5 {name=SET0 dir=in}
+B 5 -152.5 17.5 -147.5 22.5 {name=WDI_IN dir=in}
+B 5 147.5 -2.5 152.5 2.5 {name=RESET_OUT dir=out}
+B 5 -2.5 -62.5 2.5 -57.5 {name=VDD dir=inout}
+B 5 -2.5 57.5 2.5 62.5 {name=VSS dir=inout}
+P 4 5 130 -40 -130 -40 -130 40 130 40 130 -40 {}
+T {@symname} -63 -6 0 0 0.3 0.3 {}
+T {@name} 135 -52 0 0 0.2 0.2 {}
+T {SET1} -125 -24 0 0 0.2 0.2 {}
+T {SET0} -125 -4 0 0 0.2 0.2 {}
+T {WDI_IN} -125 16 0 0 0.2 0.2 {}
+T {RESET_OUT} 125 -4 0 1 0.2 0.2 {}
+T {VDD} 4 -38 0 0 0.2 0.2 {}
+T {VSS} 4 26 0 0 0.2 0.2 {}

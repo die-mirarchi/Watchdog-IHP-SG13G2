@@ -1,0 +1,26 @@
+Simulacion del top wd_watchdog (sin pads) -- como correr cada banco (desde esta carpeta, IIC-OSIC-TOOLS)
+=====================================================================================================
+0) En xschem: abrir ../wd_watchdog.sch y exportar el netlist a simulation/wd_watchdog.spice.
+
+1) Logica completa del top (Icarus, ~40 s):
+     sh run_logic.sh                      -> wd_watchdog_logic.log, VEREDICTO
+   spice2v.py convierte el netlist a Verilog estructural (celdas sg13g2 1:1); oscilador y POR son modelos
+   conductuales dentro de wd_watchdog_logic_tb.v (T = 97,656 us). 37 chequeos + comparacion ciclo a ciclo
+   contra el modelo de referencia (5,4 M ciclos).
+
+2) Analogico en PVT (ngspice, ~1 min por caso, 53 casos; NPROC=2 para dos procesos):
+     python3 wd_watchdog_pvt.py           -> wd_watchdog_pvt.jsonl, VEREDICTO
+   wd_oscillater + wd_por a nivel transistor con la carga de la logica (CLK 120 fF): liberacion del POR,
+   periodo, ciclo de trabajo, caida de VDD a 0,40 V, consumo.
+     python3 wd_watchdog_por_umbral.py    -> umbral de subida y de bajada del POR en 45 esquinas (~2 min)
+
+3) Top a nivel transistor, caso tipico (ngspice, ~1 h):
+     python3 wd_watchdog_tr.py            -> wd_watchdog_tr.json, VEREDICTO
+   Toda la logica + POR a nivel transistor con CLK de flancos resueltos (50 MHz, tmax 0,5 ns); 2489 ciclos:
+   encendido, WDI, timeout de 1025 T, pulso de 1025 T, vuelta a arranque. Compara contra el modelo de referencia.
+
+Nota numerica: el transitorio del top con el oscilador libre NO es confiable en ngspice + PSP/OSDI. El latch
+del oscilador conmuta en un solo paso y los FF pueden capturar mal (p. ej. WDI_META = 1 con D = 0 en el flanco
+de bajada); ademas aborta ("timestep too small") en menos de 0,5 ms con 8 valores de tmax (40-130 ns).
+Por eso el oscilador/POR (2) y la logica (1, 3) se verifican por separado.
+Si el netlist no expande las celdas estandar: WD_STDCELL=/ruta/sg13g2_stdcell.spice python3 ...

@@ -1,0 +1,33 @@
+Verificacion del top wd_watchdog (sin pads) -- 12/11/2026 (commit 709e6b5 + arreglos sin commitear)
+=================================================================================================
+Arreglos aplicados antes de simular
+  1. wd_digital.sch: SET1/SET0/POR_B de wd_control conectados (commit 709e6b5).
+  2. WDI_INPUT.sym con pines VDD/VSS (@VDD @VSS, extra="VDD VSS"); instancias con VDD=VDD VSS=VSS.
+  3. wd_por.sch: R1 = 0,5/320 um (con 360 um: umbral 1,102 V en ss/85/res_bcs -> no libera a 1,08 V).
+  4. wd_watchdog.sch: iopins VDD/VSS; sin la AND2 x6 (RESET_OUT = RESET de wd_digital); wd_watchdog.sym nuevo.
+
+1) Logica del top (Icarus, run_logic.sh)                      VEREDICTO: PASS
+   37/37 chequeos; 5 423 848 ciclos contra el modelo de referencia, 0 diferencias.
+   arranque 102 401 T = 10,0001 s; pulso 1025 T = 100,10 ms;
+   timeouts desde el flanco de WDI_IN: 00 = 1,0004 s, 01 = 0,1003 s, 10 = 10,0003 s (latencia 2-3 T).
+   Discrimina: netlist con SET/POR_B de wd_control flotantes -> X; 3 mutantes -> FAIL.
+
+2a) Umbral del POR (wd_watchdog_por_umbral.py, 45 esquinas)   VEREDICTO: PASS
+   320 um: sube 0,492-1,017 V; baja 0,389-0,813 V (histeresis 0,08-0,20 V).
+   360 um: sube 0,542-1,102 V (FAIL a 1,08 V).
+
+2b) Analogico en PVT (wd_watchdog_pvt.py, 53 casos)           52/53 PASS
+   VDD de liberacion 0,575-0,908 V (R/C tipicos), 0,492-1,017 V (R/C wcs/bcs).
+   T: -0,9...+1,3 % (R/C tipicos); +23,7...+25,9 % (wcs), -20,6...-21,7 % (bcs). Ciclo de trabajo 49,7-50,0 %.
+   FAIL: ff/85/1,08/R wcs, la caida a 0,40 V no reinicia (umbral de bajada 0,389 V).
+
+3) Top a nivel transistor, tt/25 C/1,2 V (wd_watchdog_tr.py)  VEREDICTO: PASS
+   2488 ciclos contra el modelo de referencia, 0 diferencias (POR_B, RESET_OUT, BOOT, ACTIVE, cuenta de 17 bits).
+   Timeout 1027,5 ciclos desde el flanco de WDI (1025 T + sincronizacion); pulso 1025,00 ciclos;
+   WDI antes de POR_B y durante el pulso: ignorados. RESET_OUT 342 ps despues del flanco de CLK.
+   Oscilador + POR en tiempo real: POR a 0,75 V; T = 97,79 us; P1/POR_B en los flancos 1 y 2.
+
+Consumo (tt, 27 C, 1,2 V): total 10,12 uA
+   oscilador 8,97 uA (bias 2,64; comp_sup 2,83; comp_inf 1,41; divisor VH/VL 1,88; DRIVE 0,21; buf_4 CLK 0,002)
+   POR 1,12 uA (divisor 0,58; carga RL 0,54); logica 23 nA (fuga 18,5 nA + 441 fC/ciclo); WDI+sync 2,9 nA.
+   PVT: oscilador 5,2-14,8 uA; POR 0,70-1,85 uA; fuga de la logica 1,5 nA-1,25 uA (ff/85/1,32).

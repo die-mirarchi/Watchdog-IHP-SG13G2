@@ -117,4 +117,4 @@ C {launcher.sym} 1130 -560 0 0 {name=h5
 descr="load waves"
 tclcommand="xschem raw_read $netlist_dir/@schname\\\\.raw tran"
 }
-C {WDI_INPUT.sym} 650 -300 0 0 {name=x1}
+C {WDI_INPUT.sym} 650 -300 0 0 {name=x1 VDD=VDD VSS=VSS}
