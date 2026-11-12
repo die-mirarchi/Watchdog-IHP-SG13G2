@@ -59,8 +59,8 @@ N 630 10 740 10 {lab=TO}
 N 730 50 740 50 {lab=WE_N}
 N 650 50 650 90 {lab=WDI_EDGE}
 N 740 50 740 90 {lab=WE_N}
-N 730 -70 730 -30 {lab=#net2}
-N 730 -30 740 -30 {lab=#net2}
+N 730 -60 730 -30 {lab=ACTIVE}
+N 730 -30 740 -30 {lab=ACTIVE}
 N 40 510 50 510 {lab=T01}
 N 40 550 50 550 {lab=RESET}
 N 600 -50 610 -50 {lab=RESET}
@@ -88,6 +88,8 @@ N -160 -250 -140 -250 {lab=T10}
 N -160 -280 -140 -280 {lab=T00}
 N -160 -310 -140 -310 {lab=Q10_N}
 N -160 -340 -140 -340 {lab=WDI_EDGE}
+N 730 -60 740 -60 {lab=ACTIVE}
+N 730 -70 730 -60 {lab=ACTIVE}
 C {sg13g2_dllrq_1.sym} -50 20 0 0 {name=x1 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {sg13g2_dllrq_1.sym} -50 110 0 0 {name=x2 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {lab_pin.sym} -140 -70 0 1 {name=p12 sig_type=std_logic lab=POR_B
@@ -243,3 +245,5 @@ C {ipin.sym} -160 -310 0 0 {name=p68 lab=Q10_N}
 C {lab_pin.sym} -140 -340 0 1 {name=p69 sig_type=std_logic lab=WDI_EDGE
 }
 C {ipin.sym} -160 -340 0 0 {name=p70 lab=WDI_EDGE}
+C {lab_pin.sym} 740 -60 0 1 {name=p71 sig_type=std_logic lab=ACTIVE
+}

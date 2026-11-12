@@ -185,8 +185,8 @@ N -160 -200 -140 -200 {lab=HI}
 N -350 10 -340 10 {lab=HI}
 N 0 -200 20 -200 {lab=T00}
 N 0 -170 20 -170 {lab=T10}
-N 0 -140 20 -140 {lab=T10}
-N 0 -110 20 -110 {lab=T10}
+N 0 -140 20 -140 {lab=T01}
+N 0 -110 20 -110 {lab=Q10_N}
 C {one_bit.sym} -190 0 0 0 {name=x1 VDD=VDD VSS=VSS}
 C {lab_pin.sym} -140 -170 0 1 {name=p12 sig_type=std_logic lab=CLK
 }
@@ -309,7 +309,7 @@ C {lab_pin.sym} 500 430 0 0 {name=p56 sig_type=std_logic lab=CLR
 }
 C {lab_pin.sym} 500 390 0 0 {name=p57 sig_type=std_logic lab=CLK
 }
-C {lab_pin.sym} 830 330 0 0 {name=p58 sig_type=std_logic lab=Q10
+C {lab_pin.sym} 830 330 0 0 {name=p58 sig_type=std_logic lab=T01
 }
 C {one_bit.sym} 1080 400 0 0 {name=x12 VDD=VDD VSS=VSS}
 C {lab_pin.sym} 920 370 0 0 {name=p59 sig_type=std_logic lab=POR_B
@@ -411,7 +411,7 @@ C {opin.sym} 20 -170 0 0 {name=p104 lab=T10}
 C {lab_pin.sym} 0 -170 0 0 {name=p105 sig_type=std_logic lab=T10
 }
 C {opin.sym} 20 -140 0 0 {name=p106 lab=T01}
-C {lab_pin.sym} 0 -140 0 0 {name=p107 sig_type=std_logic lab=Q10
+C {lab_pin.sym} 0 -140 0 0 {name=p107 sig_type=std_logic lab=T01
 }
 C {opin.sym} 20 -110 0 0 {name=p108 lab=Q10_N}
 C {lab_pin.sym} 0 -110 0 0 {name=p109 sig_type=std_logic lab=Q10_N
