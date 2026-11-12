@@ -37,6 +37,9 @@ N -530 50 -510 50 {lab=POR_B}
 N -560 -10 -510 -10 {lab=HI}
 N -560 -30 -560 -10 {lab=HI}
 N -580 -10 -560 -10 {lab=HI}
+N -130 90 -120 90 {lab=SET1}
+N -130 110 -120 110 {lab=SET0}
+N -130 130 -120 130 {lab=POR_B}
 C {wd_control.sym} 30 40 0 0 {name=x1 VDD=VDD VSS=VSS}
 C {counter17.sym} -360 20 0 0 {name=x2 VDD=VDD VSS=VSS}
 C {lab_pin.sym} -580 -10 0 0 {name=p28 sig_type=std_logic lab=HI
