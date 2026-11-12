@@ -106,8 +106,8 @@ C {lab_pin.sym} 750 -280 0 0 {name=p7 sig_type=std_logic lab=CLK
 C {lab_pin.sym} 730 -160 0 1 {name=p8 sig_type=std_logic lab=CLK
 }
 C {sg13g2_pr/rppd.sym} 820 -60 1 0 {name=R4
-w=0.5e-6
-l=175.5e-6
+w=1e-6
+l=338e-6
 model=rppd
 body=VSS
 spiceprefix=X

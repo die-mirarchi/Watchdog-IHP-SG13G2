@@ -1,6 +1,6 @@
 ** sch_path: /workspace/design/blocks/counter_bit/schematic/one_bit_tb.sch
 **.subckt one_bit_tb
-x1 Q POR_B CLK CI CLR VDD VSS one_bit
+x1 CO POR_B CLK CI CLR VDD VSS one_bit
 **** begin user architecture code
 
 
@@ -149,8 +149,8 @@ end
 * expanding   symbol:  one_bit.sym # of pins=5
 ** sym_path: /workspace/design/blocks/counter_bit/schematic/one_bit.sym
 ** sch_path: /workspace/design/blocks/counter_bit/schematic/one_bit.sch
-.subckt one_bit Q POR_B CLK CI CLR VDD VSS
-*.opin Q
+.subckt one_bit CO POR_B CLK CI CLR VDD VSS
+*.opin CO
 *.ipin CLK
 *.ipin POR_B
 *.ipin CLR
@@ -159,6 +159,7 @@ x1 Q Q_N CLK D POR_B VDD VSS sg13g2_dfrbp_1
 x2 D INC NCLR VDD VSS sg13g2_and2_1
 x3 INC Q CI VDD VSS sg13g2_xor2_1
 x4 NCLR CLR VDD VSS sg13g2_inv_1
+x5 CO CI Q VDD VSS sg13g2_and2_1
 .ends
 
 

@@ -153,9 +153,9 @@ else
 end
 .endc
 .end"}
-C {devices/lab_pin.sym} 450 -10 0 1 {name=l_EDGE lab=Q}
+C {devices/lab_pin.sym} 450 -10 0 1 {name=l_EDGE lab=CO}
 C {devices/lab_pin.sym} 100 -10 0 0 {name=l_EDGE1 lab=POR_B}
-C {one_bit.sym} 270 20 0 0 {name=x1 VDD=VDD VSS=VSS}
 C {devices/lab_pin.sym} 100 10 0 0 {name=l_EDGE2 lab=CLK}
 C {devices/lab_pin.sym} 100 30 0 0 {name=l_EDGE3 lab=CI}
 C {devices/lab_pin.sym} 100 50 0 0 {name=l_EDGE4 lab=CLR}
+C {one_bit.sym} 270 20 0 0 {name=x1 VDD=VDD VSS=VSS}
