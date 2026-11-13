@@ -154,7 +154,7 @@ C {lab_pin.sym} 470 270 0 1 {name=p25 sig_type=std_logic lab=NB
 }
 C {sg13g2_or3_1.sym} -50 470 0 0 {name=x7 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {sg13g2_mux2_2.sym} 90 490 0 0 {name=x8 VDD=VDD VSS=VSS prefix=sg13g2_ }
-C {sg13g2_buf_16.sym} 200 490 0 0 {name=x9 VDD=VDD VSS=VSS prefix=sg13g2_ }
+C {sg13g2_buf_2.sym} 200 490 0 0 {name=x9 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {lab_pin.sym} 40 510 0 0 {name=p26 sig_type=std_logic lab=T01
 }
 C {lab_pin.sym} 40 550 0 0 {name=p27 sig_type=std_logic lab=RESET

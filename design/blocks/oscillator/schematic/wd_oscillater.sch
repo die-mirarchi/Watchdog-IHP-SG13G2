@@ -58,7 +58,7 @@ C {comp_inf.sym} 0 -30 0 0 {name=x2 VDD=VDD VSS=VSS}
 C {comp_sup.sym} 0 40 0 0 {name=x3 VDD=VDD VSS=VSS}
 C {sg13g2_pr/rhigh.sym} -340 60 0 0 {name=R1
 w=1e-6
-l=150.0e-6
+l=450.0e-6
 model=rhigh
 body=VSS
 spiceprefix=X
@@ -69,7 +69,7 @@ value="expr_eng(  ( 1.6e-4 / @w + 1360.0 * ( (@b + 1)* @l + ( 1.081*( @w - 0.04e
 }
 C {sg13g2_pr/rhigh.sym} -340 160 0 0 {name=R2
 w=1e-6
-l=150.0e-6
+l=450.0e-6
 model=rhigh
 body=VSS
 spiceprefix=X
@@ -80,7 +80,7 @@ value="expr_eng(  ( 1.6e-4 / @w + 1360.0 * ( (@b + 1)* @l + ( 1.081*( @w - 0.04e
 }
 C {sg13g2_pr/rhigh.sym} -340 260 0 0 {name=R3
 w=1e-6
-l=150.0e-6
+l=450.0e-6
 model=rhigh
 body=VSS
 spiceprefix=X

@@ -41,3 +41,15 @@ Consumo (tt, 27 C, 1,2 V): total 10,12 uA
    POR 1,12 uA (divisor 0,58; carga RL 0,54); logica 23 nA (fuga 18,5 nA + 441 fC/ciclo); WDI+sync 2,9 nA
    (medido con el sync anterior; la fuga del contador de 5 bits nuevo no esta medida, es chica frente a la del de 17 bits).
    PVT: oscilador 5,2-14,8 uA; POR 0,70-1,85 uA; fuga de la logica 1,5 nA-1,25 uA (ff/85/1,32).
+
+Optimizaciones aplicadas (13/11/2026)
+  a. wd_oscillater.sch: divisor VH/VL R1-R3 rhigh 1/150 -> 1/450 um (x3).
+     PVT (wd_watchdog_pvt.py, 53 casos): 52/53 PASS, la misma falla de siempre (caida a 0,40 V en ff/85/wcs, POR).
+     T cambia -0,19...+0,32 % contra el divisor anterior (media +0,16 %); ciclo de trabajo 49,8-50,0 %
+     (sf/27/1,08 con tmax 70 ns da 36,8 %: artefacto del latch, con tmax 100 ns da 49,94 %).
+     Oscilador (chequeo de CHG a media tension): tt/27/1,2 8,97 -> 7,71 uA (-1,26 uA); ss/-40/1,08 6,30 -> 5,33;
+     ff/85/1,32 12,13 -> 10,53. Total del chip en tt/27/1,2: 10,12 -> ~8,86 uA (-12 %).
+  b. wd_control.sch: x9 sg13g2_buf_16 -> sg13g2_buf_2 en CLR (mismos pines en el simbolo).
+     CLR con 17 inv_1 + 50 fF: transicion 0,26-0,50 ns, retardo 0,17-0,33 ns (ss/-40/1,08 peor) frente a T = 97,7 us.
+     Fuga del buffer: tt 1,36 -> 0,18 nA; ff/85/1,32 86,6 -> 11,0 nA.
+  Logica del top con el netlist nuevo de xschem: 38/38, 5 654 058 ciclos, 0 diferencias (VEREDICTO: PASS).
