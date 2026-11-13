@@ -107,7 +107,7 @@ C {lab_pin.sym} 730 -160 0 1 {name=p8 sig_type=std_logic lab=CLK
 }
 C {sg13g2_pr/rppd.sym} 820 -60 1 0 {name=R4
 w=1e-6
-l=338e-6
+l=661e-6
 model=rppd
 body=VSS
 spiceprefix=X
@@ -136,7 +136,7 @@ C {sg13g2_pr/cap_cmim.sym} 910 -20 0 0 {name=C4
 model=cap_cmim
  w=64.0e-6
  l=64.0e-6
- m=8
+ m=4
   mm_ok=1
  spiceprefix=X}
 C {lab_pin.sym} 940 -60 0 1 {name=p11 sig_type=std_logic lab=VC

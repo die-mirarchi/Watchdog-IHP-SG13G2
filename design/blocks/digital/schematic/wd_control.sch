@@ -5,23 +5,39 @@ V {}
 S {}
 F {}
 E {}
+T {Config. autorreparable (13/11/2026)} -420 -55 0 0 0.3 0.3 {}
+T {GN = POR_B & RS_N: CFG relee SET1/SET0} -420 -28 0 0 0.22 0.22 {}
+T {en el POR y en cada pulso de RESET} -420 -10 0 0 0.22 0.22 {}
+T {DIS = CFG0 & SET0 & SET1 & CFG1} 100 135 0 0 0.22 0.22 {}
+T {(un error en CFG no deshabilita)} 100 155 0 0 0.22 0.22 {}
+T {A3 = T10 (antes LO)} 300 -60 0 0 0.2 0.2 {}
+N 40 0 100 0 {lab=CFG0}
+N 100 0 140 0 {lab=CFG0}
+N 100 0 100 15 {lab=CFG0}
+N 140 0 140 -20 {lab=CFG0}
+N 140 -20 170 -20 {lab=CFG0}
+N 40 90 100 90 {lab=CFG1}
+N 100 90 140 90 {lab=CFG1}
+N 100 90 100 75 {lab=CFG1}
+N 140 90 140 100 {lab=CFG1}
+N 140 100 170 100 {lab=CFG1}
+N 150 20 170 20 {lab=SET0}
+N 150 60 170 60 {lab=SET1}
+N 290 40 310 40 {lab=DIS}
+N 400 90 410 90 {lab=T10}
+N -380 55 -360 55 {lab=POR_B}
+N -380 95 -360 95 {lab=RS_N}
+N -240 75 -220 75 {lab=GN}
 N -160 -70 -140 -70 {lab=POR_B}
 N -160 -100 -140 -100 {lab=SET0}
 N 0 -100 20 -100 {lab=CLR}
 N 0 -70 20 -70 {lab=RESET}
 N -160 -130 -140 -130 {lab=SET1}
 N -160 -160 -140 -160 {lab=HI}
-N 40 -0 60 -0 {lab=CFG0}
-N 60 -0 60 20 {lab=CFG0}
-N 60 60 60 90 {lab=CFG1}
-N 40 90 60 90 {lab=CFG1}
-N 60 -20 60 -0 {lab=CFG0}
-N 60 90 60 110 {lab=CFG1}
-N 180 40 190 40 {lab=DIS}
-N -150 0 -140 0 {lab=POR_B}
+N -150 0 -140 0 {lab=GN}
 N -150 20 -140 20 {lab=SET0}
 N -150 40 -140 40 {lab=HI}
-N -150 90 -140 90 {lab=POR_B}
+N -150 90 -140 90 {lab=GN}
 N -150 110 -140 110 {lab=SET1}
 N -150 130 -140 130 {lab=HI}
 N -150 230 -140 230 {lab=WDI_EDGE}
@@ -79,8 +95,6 @@ N 1130 -10 1140 -10 {lab=POR_B}
 N 1140 -70 1140 -50 {lab=CLK}
 N 1320 -50 1330 -50 {lab=RESET}
 N 1320 -30 1330 -30 {lab=RS_N}
-N 270 90 410 90 {lab=LO}
-N 270 90 270 120 {lab=LO}
 N 0 -160 20 -160 {lab=ACTIVE}
 N 0 -130 20 -130 {lab=BOOT}
 N -160 -220 -140 -220 {lab=CLK}
@@ -110,24 +124,17 @@ C {ipin.sym} -160 -130 0 0 {name=p2 lab=SET1}
 C {lab_pin.sym} -140 -160 0 1 {name=p3 sig_type=std_logic lab=HI
 }
 C {ipin.sym} -160 -160 0 0 {name=p4 lab=HI}
-C {lab_pin.sym} -150 0 0 0 {name=p5 sig_type=std_logic lab=POR_B
+C {lab_pin.sym} -150 0 0 0 {name=p5 sig_type=std_logic lab=GN
 }
 C {lab_pin.sym} -150 20 0 0 {name=p6 sig_type=std_logic lab=SET0
 }
 C {lab_pin.sym} -150 40 0 0 {name=p7 sig_type=std_logic lab=HI
 }
-C {lab_pin.sym} -150 90 0 0 {name=p8 sig_type=std_logic lab=POR_B
+C {lab_pin.sym} -150 90 0 0 {name=p8 sig_type=std_logic lab=GN
 }
 C {lab_pin.sym} -150 110 0 0 {name=p9 sig_type=std_logic lab=SET1
 }
 C {lab_pin.sym} -150 130 0 0 {name=p10 sig_type=std_logic lab=HI
-}
-C {sg13g2_and2_2.sym} 120 40 0 0 {name=x4 VDD=VDD VSS=VSS prefix=sg13g2_ }
-C {lab_pin.sym} 60 -20 0 1 {name=p11 sig_type=std_logic lab=CFG0
-}
-C {lab_pin.sym} 60 110 0 1 {name=p14 sig_type=std_logic lab=CFG1
-}
-C {lab_pin.sym} 190 40 0 1 {name=p15 sig_type=std_logic lab=DIS
 }
 C {sg13g2_a21o_1.sym} -60 270 0 0 {name=x3 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {lab_pin.sym} -150 230 0 0 {name=p16 sig_type=std_logic lab=WDI_EDGE
@@ -221,9 +228,6 @@ C {lab_pin.sym} 1330 -50 0 1 {name=p55 sig_type=std_logic lab=RESET
 }
 C {lab_pin.sym} 1330 -30 0 1 {name=p56 sig_type=std_logic lab=RS_N
 }
-C {sg13g2_tielo.sym} 270 120 0 0 {name=x17 VDD=VDD VSS=VSS prefix=sg13g2_ }
-C {lab_pin.sym} 270 100 0 0 {name=p57 sig_type=std_logic lab=LO
-}
 C {opin.sym} 20 -160 0 0 {name=p40 lab=ACTIVE}
 C {lab_pin.sym} 0 -160 0 0 {name=p58 sig_type=std_logic lab=ACTIVE
 }
@@ -246,4 +250,24 @@ C {lab_pin.sym} -140 -340 0 1 {name=p69 sig_type=std_logic lab=WDI_EDGE
 }
 C {ipin.sym} -160 -340 0 0 {name=p70 lab=WDI_EDGE}
 C {lab_pin.sym} 740 -60 0 1 {name=p71 sig_type=std_logic lab=ACTIVE
+}
+C {lab_pin.sym} 100 15 0 0 {name=p80 sig_type=std_logic lab=CFG0
+}
+C {lab_pin.sym} 100 75 0 0 {name=p81 sig_type=std_logic lab=CFG1
+}
+C {sg13g2_and4_1.sym} 230 40 0 0 {name=x4 VDD=VDD VSS=VSS prefix=sg13g2_ }
+C {lab_pin.sym} 150 20 0 0 {name=p83 sig_type=std_logic lab=SET0
+}
+C {lab_pin.sym} 150 60 0 0 {name=p84 sig_type=std_logic lab=SET1
+}
+C {lab_pin.sym} 310 40 0 1 {name=p86 sig_type=std_logic lab=DIS
+}
+C {lab_pin.sym} 400 90 0 0 {name=p90 sig_type=std_logic lab=T10
+}
+C {sg13g2_and2_1.sym} -300 75 0 0 {name=x18 VDD=VDD VSS=VSS prefix=sg13g2_ }
+C {lab_pin.sym} -380 55 0 0 {name=p87 sig_type=std_logic lab=POR_B
+}
+C {lab_pin.sym} -380 95 0 0 {name=p88 sig_type=std_logic lab=RS_N
+}
+C {lab_pin.sym} -220 75 0 1 {name=p89 sig_type=std_logic lab=GN
 }
