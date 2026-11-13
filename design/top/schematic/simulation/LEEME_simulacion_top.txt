@@ -33,3 +33,18 @@ del oscilador conmuta en un solo paso y los FF pueden capturar mal (p. ej. WDI_M
 de bajada); ademas aborta ("timestep too small") en menos de 0,5 ms con 8 valores de tmax (40-130 ns).
 Por eso el oscilador/POR (2) y la logica (1, 3) se verifican por separado.
 Si el netlist no expande las celdas estandar: WD_STDCELL=/ruta/sg13g2_stdcell.spice python3 ...
+
+Cambios del 13/11/2026 (optimizaciones aplicadas)
+-------------------------------------------------
+- wd_oscillater: RT = rppd 1/661 um (b=15), CT = 4 MIM 64x64 (antes 1/338 y 8 MIM). Mismo T, ~11 000 um2 menos.
+- wd_control: configuracion autorreparable. GN = POR_B & RS_N (x18): los latches CFG releen SET1/SET0 en el POR
+  y en cada pulso de RESET; DIS = CFG0 & SET0 & SET1 & CFG1 (x4 and4_1); A3 del mux4 = T10 (se quito la tielo).
+  Cambiar los puentes ahora tiene efecto en el proximo pulso de reset (antes: solo con un ciclo de alimentacion).
+- top: wd_clkmon (x6) y RESET_OUT = RESET + CLK_LOST (x7 or2_1, fuera de POR_B).
+Bancos nuevos o actualizados (todos con: sh run_logic.sh wd_watchdog.spice <tb>):
+     wd_watchdog_logic_tb.v   modelo de referencia con las ecuaciones nuevas (38 chequeos + 5,65 M ciclos)
+     wd_watchdog_clkmon_tb.v  oscilador que no arranca; CLK detenido en 0 y en 1; recuperacion
+     upset_tb.v [+B]          error forzado en los latches CFG (usa dllrq_beh.v): A = 00 -> 11 con firmware
+                              colgado; B = 10 -> 01 con firmware sano. El netlist anterior falla los dos.
+     wd_clkmon_beh.v          modelo conductual de wd_clkmon (CLK_LOST tras 0,86 ms sin flancos)
+  A nivel transistor:  python3 wd_clkmon_pvt.py   -> wd_clkmon_pvt.json, VEREDICTO (34 casos, ~3 min)

@@ -7,6 +7,7 @@
 `timescale 1ns/1ps
 module wd_oscillater (output CLK);       assign CLK = tb.clk;             endmodule
 module wd_por        (output POR_RAW_N); assign POR_RAW_N = tb.por_raw_n; endmodule
+// wd_clkmon: modelo conductual en wd_clkmon_beh.v (con CLK corriendo, CLK_LOST = 0)
 
 module tb;
   reg clk = 0, por_raw_n = 0, S1 = 0, S0 = 0, WDI = 0;
@@ -29,12 +30,12 @@ module tb;
   always @(posedge clk or negedge por_raw_n)
     if (!por_raw_n) begin g_p1 <= 0; g_sy <= 0; g_d <= 0; g_porb <= 0; end
     else begin g_p1 <= 1; g_sy <= g_p1; if (g_en) g_d <= g_d + 1'b1; g_porb <= g_porb | g_tc; end
-  always @(g_porb or S0 or S1) if (!g_porb) begin g_c0 = S0; g_c1 = S1; end   // dllrq: transparente con POR_B = 0
+  always @(g_porb or g_rs or S0 or S1) if (!g_porb || g_rs) begin g_c0 = S0; g_c1 = S1; end   // re-latch en el pulso   // dllrq: transparente con POR_B = 0
   wire g_edge = g_sync & ~g_hist;
-  wire g_dis  = g_c0 & g_c1;
+  wire g_dis  = g_c0 & g_c1 & S0 & S1;   // DIS exige los pines
   wire g_act  = ~(g_dis | g_rs);
   wire g_t01  = g_cnt[10], g_t00 = g_cnt[13] & g_cnt[11], g_t10 = g_cnt[16] & g_cnt[15] & g_cnt[12];
-  wire g_ton  = ({g_c1, g_c0} == 2'd0) ? g_t00 : ({g_c1, g_c0} == 2'd1) ? g_t01 : ({g_c1, g_c0} == 2'd2) ? g_t10 : 1'b0;
+  wire g_ton  = ({g_c1, g_c0} == 2'd0) ? g_t00 : ({g_c1, g_c0} == 2'd1) ? g_t01 : ({g_c1, g_c0} == 2'd2) ? g_t10 : g_t10;   // codigo 11 -> T10
   wire g_to   = g_nb ? g_ton : g_t10;
   wire g_hit  = g_act & g_to & ~g_edge;
   wire g_clr  = g_rs ? g_t01 : (g_dis | g_edge | g_hit);
@@ -46,7 +47,7 @@ module tb;
       g_nb  <= (g_nb | (g_edge & g_act)) & ~g_rs;
       g_cnt <= g_clr ? 17'd0 : g_cnt + 1'b1;
     end
-  wire g_out = g_porb & g_rs;
+  wire g_out = (g_porb & g_rs) | dut.CLK_LOST;   // RESET_OUT = RESET + CLK_LOST
 
   integer nmis = 0, ncmp = 0; reg cmp_on = 0;
   always @(negedge clk) if (cmp_on) begin
@@ -118,8 +119,9 @@ module tb;
       // pulsos minimos de 2 T
       wait_T(20); kick(2.0); wait_T(4); chk(BOOT === 0, "pulso WDI de 2 T (0,2 ms) reconocido");
       // cambiar SET en marcha no tiene efecto (latcheado en el POR)
-      #(T*0.4); S1 = ~S1; S0 = ~S0; kick(10.24); measure;
-      chk(ta > exp_n[cfg] + 1 && ta < exp_n[cfg] + 3, "SET cambiado en marcha: sin efecto");
+      #(T*0.4); S1 = ~S1; S0 = ~S0; kick(10.24);
+      @(posedge RESET_OUT); ta = ($realtime - t0)/T; #(T*3); S1 = cfg[1]; S0 = cfg[0]; @(negedge RESET_OUT);
+      chk(ta > exp_n[cfg] + 1 && ta < exp_n[cfg] + 3, "SET cambiado en marcha: sin efecto hasta el pulso (se re-latchea en el pulso)");
       // WDI durante el pulso: ignorado
       t1 = $realtime; @(posedge RESET_OUT); #(T*100.4); WDI = 1; #(T*10); WDI = 0;
       @(negedge RESET_OUT); #1; chk(BOOT === 1, "WDI durante el pulso: ignorado (vuelve a arranque)");
