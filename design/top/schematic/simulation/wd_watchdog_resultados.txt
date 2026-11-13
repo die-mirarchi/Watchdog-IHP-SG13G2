@@ -1,16 +1,19 @@
-Verificacion del top wd_watchdog (sin pads) -- 12/11/2026 (commit 709e6b5 + arreglos sin commitear)
+Verificacion del top wd_watchdog (sin pads) -- 12-13/11/2026 (commit a8617ce + wd_reset_sync v2)
 =================================================================================================
 Arreglos aplicados antes de simular
   1. wd_digital.sch: SET1/SET0/POR_B de wd_control conectados (commit 709e6b5).
   2. WDI_INPUT.sym con pines VDD/VSS (@VDD @VSS, extra="VDD VSS"); instancias con VDD=VDD VSS=VSS.
   3. wd_por.sch: R1 = 0,5/320 um (con 360 um: umbral 1,102 V en ss/85/res_bcs -> no libera a 1,08 V).
   4. wd_watchdog.sch: iopins VDD/VSS; sin la AND2 x6 (RESET_OUT = RESET de wd_digital); wd_watchdog.sym nuevo.
+  5. wd_reset_sync.sch v2: 2 FF + contador de 5 bits; POR_B sube en el 34.o flanco de CLK tras POR_RAW_N (~3,3 ms),
+     para que la logica no se libere con VDD todavia en rampa (antes: 2.o flanco, ~0,2 ms).
 
 1) Logica del top (Icarus, run_logic.sh)                      VEREDICTO: PASS
-   37/37 chequeos; 5 423 848 ciclos contra el modelo de referencia, 0 diferencias.
+   38/38 chequeos; 5 654 058 ciclos contra el modelo de referencia, 0 diferencias.
+   POR_B en el 34.o flanco; POR_RAW_N = 0 durante el retardo -> la cuenta vuelve a empezar (34 flancos).
    arranque 102 401 T = 10,0001 s; pulso 1025 T = 100,10 ms;
    timeouts desde el flanco de WDI_IN: 00 = 1,0004 s, 01 = 0,1003 s, 10 = 10,0003 s (latencia 2-3 T).
-   Discrimina: netlist con SET/POR_B de wd_control flotantes -> X; 3 mutantes -> FAIL.
+   Discrimina: netlist con SET/POR_B de wd_control flotantes -> X; sync anterior (2 FF) -> FAIL; 3 mutantes -> FAIL.
 
 2a) Umbral del POR (wd_watchdog_por_umbral.py, 45 esquinas)   VEREDICTO: PASS
    320 um: sube 0,492-1,017 V; baja 0,389-0,813 V (histeresis 0,08-0,20 V).
@@ -21,13 +24,20 @@ Arreglos aplicados antes de simular
    T: -0,9...+1,3 % (R/C tipicos); +23,7...+25,9 % (wcs), -20,6...-21,7 % (bcs). Ciclo de trabajo 49,7-50,0 %.
    FAIL: ff/85/1,08/R wcs, la caida a 0,40 V no reinicia (umbral de bajada 0,389 V).
 
+2c) wd_reset_sync v2 + wd_por a nivel transistor (wd_reset_sync_pvt.py, 18 esquinas)  VEREDICTO: 18/18 PASS
+   5 MOS x -40/27/85 C a 1,08 V + tt/ss/ff 27 C 1,32 V; CLK ideal de 20 MHz, tmax 0,5 ns.
+   POR_B sube 34 flancos despues de cada liberacion (35 en 2 esquinas: la liberacion cae sobre un flanco, +-1 ciclo
+   normal de un sincronizador). Caida a 0,3 V con POR_B = 1: POR_B < 0,1 V. Caida durante la cuenta: reinicia el retardo.
+
 3) Top a nivel transistor, tt/25 C/1,2 V (wd_watchdog_tr.py)  VEREDICTO: PASS
    2488 ciclos contra el modelo de referencia, 0 diferencias (POR_B, RESET_OUT, BOOT, ACTIVE, cuenta de 17 bits).
    Timeout 1027,5 ciclos desde el flanco de WDI (1025 T + sincronizacion); pulso 1025,00 ciclos;
    WDI antes de POR_B y durante el pulso: ignorados. RESET_OUT 342 ps despues del flanco de CLK.
-   Oscilador + POR en tiempo real: POR a 0,75 V; T = 97,79 us; P1/POR_B en los flancos 1 y 2.
+   (Corrida con el sync anterior de 2 FF; el resto de la logica no cambio.)
+   Oscilador + POR en tiempo real: POR a 0,75 V; T = 97,79 us; P1/SYNC en los flancos 1 y 2 (POR_B 32 flancos despues).
 
 Consumo (tt, 27 C, 1,2 V): total 10,12 uA
    oscilador 8,97 uA (bias 2,64; comp_sup 2,83; comp_inf 1,41; divisor VH/VL 1,88; DRIVE 0,21; buf_4 CLK 0,002)
-   POR 1,12 uA (divisor 0,58; carga RL 0,54); logica 23 nA (fuga 18,5 nA + 441 fC/ciclo); WDI+sync 2,9 nA.
+   POR 1,12 uA (divisor 0,58; carga RL 0,54); logica 23 nA (fuga 18,5 nA + 441 fC/ciclo); WDI+sync 2,9 nA
+   (medido con el sync anterior; la fuga del contador de 5 bits nuevo no esta medida, es chica frente a la del de 17 bits).
    PVT: oscilador 5,2-14,8 uA; POR 0,70-1,85 uA; fuga de la logica 1,5 nA-1,25 uA (ff/85/1,32).

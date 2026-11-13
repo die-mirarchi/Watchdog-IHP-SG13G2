@@ -71,10 +71,10 @@ if '--solo-netlist' not in sys.argv:
     subprocess.run(['ngspice', '-b', 'wd_watchdog_tr.sp'], stdout=open('wd_watchdog_tr.log', 'w'), stderr=subprocess.STDOUT)
 
 # ---------------- modelo de referencia ----------------
-def golden_run(rises, t_por_rel, wdi_fn, set1, set0):
+def golden_run(rises, t_por_rel, wdi_fn, set1, set0, delay=True):
     """rises: tiempos de flancos de subida de CLK; t_por_rel: liberacion de POR_RAW_N; wdi_fn(t) -> 0/1
     devuelve lista de estados DESPUES de cada flanco (dict)."""
-    p1 = porb = meta = sync = hist = rs = nb = 0; cnt = 0
+    p1 = sy = porb = meta = sync = hist = rs = nb = 0; cnt = 0; dly = 0
     c0, c1 = set0, set1
     out = []
     for t in rises:
@@ -93,7 +93,12 @@ def golden_run(rises, t_por_rel, wdi_fn, set1, set0):
             meta, sync, hist = w, meta, sync
             rs, nb = hit | (rs & (1 - t01)), (nb | (edge & act)) & (1 - rs)
             cnt = 0 if clr else (cnt + 1) & 0x1FFFF
-        p1, porb = 1, p1
+        if delay:   # wd_reset_sync v2: 2 FF + retardo de 32 ciclos
+            en = sy & (1 - porb); tc = en & int(dly == 31)
+            if en: dly = (dly + 1) & 31
+            p1, sy, porb = 1, p1, porb | tc
+        else:
+            p1, porb = 1, p1
         dis = c0 & c1; act = 1 - (dis | rs)
         out.append(dict(t=t, porb=porb, rs=rs, nb=nb, cnt=cnt, out=porb & rs, act=act, boot=1 - nb))
     return out

@@ -22,10 +22,13 @@ module tb;
                      dut.x5.x2.Q4, dut.x5.x2.Q3, dut.x5.x2.Q2, dut.x5.x2.Q1, dut.x5.x2.Q0};
 
   // ---------------- modelo de referencia (ecuaciones de diseno) ----------------
-  reg g_p1 = 0, g_porb = 0, g_meta = 0, g_sync = 0, g_hist = 0, g_rs = 0, g_nb = 0, g_c0 = 0, g_c1 = 0;
+  reg g_p1 = 0, g_sy = 0, g_porb = 0, g_meta = 0, g_sync = 0, g_hist = 0, g_rs = 0, g_nb = 0, g_c0 = 0, g_c1 = 0;
   reg [16:0] g_cnt = 0;
+  reg [4:0] g_d = 0;                                   // wd_reset_sync v2: retardo de POR de 32 ciclos
+  wire g_en = g_sy & ~g_porb, g_tc = g_en & (&g_d);
   always @(posedge clk or negedge por_raw_n)
-    if (!por_raw_n) begin g_p1 <= 0; g_porb <= 0; end else begin g_p1 <= 1; g_porb <= g_p1; end
+    if (!por_raw_n) begin g_p1 <= 0; g_sy <= 0; g_d <= 0; g_porb <= 0; end
+    else begin g_p1 <= 1; g_sy <= g_p1; if (g_en) g_d <= g_d + 1'b1; g_porb <= g_porb | g_tc; end
   always @(g_porb or S0 or S1) if (!g_porb) begin g_c0 = S0; g_c1 = S1; end   // dllrq: transparente con POR_B = 0
   wire g_edge = g_sync & ~g_hist;
   wire g_dis  = g_c0 & g_c1;
@@ -85,8 +88,9 @@ module tb;
     // ---- 1) encendido ----
     #(T*2.3); chk(RESET_OUT === 1'b0, "durante el POR: RESET_OUT = 0");
     phase; por_raw_n = 1; t0 = $realtime; edges = 0;
-    while (POR_B !== 1'b1) begin @(posedge clk); #1; edges = edges + 1; end
-    chk(edges == 2, "POR_B sube en el 2.o flanco de CLK tras liberar POR_RAW_N");
+    while (POR_B !== 1'b1 && edges < 100) begin @(posedge clk); #1; edges = edges + 1; end
+    chk(edges == 34, "POR_B sube en el 34.o flanco de CLK tras liberar POR_RAW_N (2 FF + 32 ciclos)");
+    $display("      POR_B: %0d flancos = %0.3f ms despues de POR_RAW_N", edges, ($realtime - t0)*1e-6);
     cmp_on = 1;
     #1; chk(BOOT === 1 && ACTIVE === 1 && RESET_OUT === 0, "tras el POR: modo arranque, supervisando, sin reset");
     for (cfg = 0; cfg < 3; cfg = cfg + 1) begin
@@ -129,6 +133,10 @@ module tb;
     por(0, 1); @(posedge POR_B); wait_T(5); kick(10.24); @(posedge RESET_OUT); #(T*300);
     phase; por_raw_n = 0; #2; chk(RESET_OUT === 0, "POR durante el pulso: RESET_OUT baja asincronicamente (< 2 ns)");
     #(3*T); phase; por_raw_n = 1; @(posedge POR_B); #1; chk(BOOT === 1 && RESET_OUT === 0, "tras el POR: arranque");
+    // ---- caida de VDD durante el retardo de POR: la cuenta vuelve a empezar ----
+    phase; por_raw_n = 0; #(3*T); phase; por_raw_n = 1; repeat (20) @(posedge clk); phase; por_raw_n = 0; #(T*0.5); por_raw_n = 1; t0 = $realtime; edges = 0;
+    while (POR_B !== 1'b1 && edges < 100) begin @(posedge clk); #1; edges = edges + 1; end
+    chk(edges == 34, "POR_RAW_N baja durante el retardo: POR_B espera 34 flancos de nuevo");
     // ---- 2) aleatorio contra el modelo de referencia ----
     $display("--- aleatorio: WDI/POR/SET contra el modelo de referencia");
     for (i = 0; i < 1500; i = i + 1) begin

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """wd_watchdog_pvt.py -- analogico del top en PVT: wd_oscillater (con bias) + wd_por a nivel transistor, con la carga real
 de la logica en CLK (120 fF) y POR_RAW_N (10 fF). Sin FF (sus artefactos con el reloj del oscilador se evitan;
-la logica se verifica aparte). POR_B se predice como el 2.o flanco de subida de CLK tras POR_RAW_N (wd_reset_sync
-verificado 45/45). Perfil: rampa 0 -> V en 1 ms; caida a 0,40 V (2,00-2,07 ms); fin 2,8 ms."""
+la logica se verifica aparte). Se mide el 2.o flanco de CLK tras POR_RAW_N (SYNC de wd_reset_sync); con el retardo de
+wd_reset_sync v2, POR_B sube 32 flancos despues (verificado en wd_reset_sync_pvt.py). Perfil: rampa 0 -> V en 1 ms; caida a 0,40 V (2,00-2,07 ms); fin 2,8 ms."""
 import sys, os, subprocess, json, itertools, numpy as np
 from multiprocessing import Pool
 RUNDIR = os.getcwd()

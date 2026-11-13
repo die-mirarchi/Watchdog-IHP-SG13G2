@@ -42,12 +42,12 @@ value="
 .temp 27
 .option method=gear maxord=2 reltol=1e-3
 ** fuentes
-VVDD VDD 0 PULSE(0 \{vdd\} 1u 1u 0.1u 300u 600u)
+VVDD VDD 0 PULSE(0 \{vdd\} 1u 1u 0.1u 4.5m 9m)
 VVSS VSS 0 DC 0
 .control
   set num_threads=1
   * ---- TRAN ----
-  tran 50n 310u
+  tran 50n 4.6m
   let idd = -1
   meas tran idd AVG i(VVDD)
   let idd_ua = -1
