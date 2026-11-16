@@ -4,8 +4,57 @@ Base limpia para desarrollar una tesis de watchdog para microcontrolador en IHP
 SG13G2. Derivada de [EAMTA2026-VLSI](https://github.com/Fundacion-Fulgor/EAMTA2026-VLSI),
 conservando historial y licencia. Repositorio de tesis independiente del fork del curso.
 
-**Estado inicial:** entorno preparado; diseño pendiente. Las carpetas de
-esquemáticos y layouts están vacías. Ver [alcance](docs/ALCANCE.md).
+**Estado: versión 1.0 (16/11/2026).** Esquemáticos completos del watchdog,
+dados por **funcionales y validados en simulación de esquemático** (ngspice +
+PSP/OSDI e Icarus). La etapa siguiente es el **layout**. Ver
+[diseño v1.0](#diseño--versión-10) y [alcance](docs/ALCANCE.md).
+
+## Diseño — versión 1.0
+
+Watchdog autónomo para microcontroladores, núcleo de 1,2 V en IHP SG13G2, con
+reloj propio (oscilador RC de 10,24 kHz), reset de encendido propio y detector
+de pérdida de reloj. El microcontrolador debe dar un flanco ascendente en
+`WDI_IN` antes del timeout; si no, `RESET_OUT` = 1 durante 100 ms.
+
+| Parámetro | Valor |
+|---|---|
+| Alimentación | VDD 1,2 V ±10 % (1,08–1,32 V) |
+| Temperatura | −40 a 85 °C |
+| Consumo | ≈ 8,9 µA (tt, 27 °C, 1,2 V); ≈ 6–14 µA en PVT |
+| Reloj interno | 10,24 kHz (T = 97,66 µs); 96,95–99,0 µs en PVT con R/C típicos; −21…+24 % con esquinas de R/C |
+| Timeout normal | `SET1 SET0` = 00 → 1 s, 01 → 0,1 s, 10 → 10 s, 11 → deshabilitado |
+| Timeout de arranque | 10 s (tras encendido, tras cada pulso y tras una pérdida de reloj) |
+| Pulso de reset | 100 ms (1025·T), `RESET_OUT` activo en alto |
+| POR | sube 0,49–1,02 V, baja 0,39–0,81 V; `POR_B` se libera en el flanco 34 (≈ 3,3 ms) |
+| Pérdida de reloj | detección 0,23–2,02 ms; reinicia el watchdog sin activar `RESET_OUT` |
+| Dispositivos | CMOS lv (L ≤ 10 µm), rhigh, rppd, MIM (≈ 24 200 µm²); sin pads en el top |
+
+Pines del top `wd_watchdog`: `SET1`, `SET0`, `WDI_IN`, `RESET_OUT`, `VDD`, `VSS`.
+
+| Bloque | Carpeta | Función |
+|---|---|---|
+| `wd_watchdog` | `design/top/` | Top: integra los bloques; `POR_RAW_N = POR_DET_N · ¬CLK_LOST`; `RESET_OUT = RESET` |
+| `wd_oscillater` | `design/blocks/oscillator/` | Oscilador de relajación RC ratiométrico (R<sub>T</sub> rppd 1/661, C<sub>T</sub> 4 MIM) |
+| `bias`, `comp_sup`, `comp_inf`, `schmitt` | `bias/`, `comparator/`, `schmitt/` | Polarización, comparadores de dos etapas, inversor Schmitt 6T |
+| `wd_por`, `wd_reset_sync` | `design/blocks/por/` | Detector de nivel de VDD y liberación síncrona del reset (34 flancos) |
+| `WDI_INPUT` | `design/blocks/wd_input/` | Sincronizador de 2 FF y detector de flanco |
+| `wd_digital` (`wd_control`, `counter17`, `one_bit`) | `digital/`, `counter_bit/` | Contador de 17 bits y máquina de control con configuración autorreparable |
+| `wd_clkmon` | `design/blocks/clkmon/` | Detector de pérdida de reloj |
+
+Verificación (detalle en `design/top/schematic/simulation/LEEME_simulacion_top.txt`):
+lógica del top 38/38 chequeos y 5 654 058 ciclos sin diferencias contra el modelo;
+oscilador 45/45 en PVT; POR + sincronizador 18/18 a nivel transistor;
+`wd_clkmon` 34/34 en PVT; analógico del top 52/53 (la única falla es un
+brown-out a 0,40 V en ff/85 °C/R wcs, pendiente de especificación).
+No incluye parásitos de layout ni Monte Carlo.
+
+Documentación de diseño (fuera del repositorio): «Esquemáticos y
+dimensionamiento», «Documento de diseño», «Verificación del top» y «Detector de
+pérdida de clock», versión 1.0.
+
+Pendiente para el chip: anillo de pads (pull-downs de SET/WDI, salida de
+drenador abierto), especificación de brown-out y de tolerancia de tiempos,
+Monte Carlo, layout, DRC/LVS y extracción.
 
 ## Instalar en otra PC
 
@@ -53,9 +102,9 @@ de simulación y extracción en `build/` o `results/`.
 
 | Carpeta | Contenido |
 |---|---|
-| `design/blocks/` | input, oscillator, bias, comparator, por, digital, output |
-| `design/top/` | Integración futura; schematic, layout, char |
-| `verification/` | Bancos, vectores y planes de verificación futuros |
+| `design/blocks/` | oscillator, bias, comparator, schmitt, por, wd_input, digital, counter_bit, clkmon (v1.0); enable_input y output: historia / pendiente |
+| `design/top/` | Top `wd_watchdog` (schematic) y bancos de simulación del top (`schematic/simulation/`) |
+| `verification/` | Bancos de las celdas (barrido tt/ss) |
 | `docs/thesis/` | Capítulos, figuras y referencias de la tesis |
 | `docs/decisions/` | Decisiones de diseño |
 | `docs/reports/` | Informes seleccionados para versionar |
@@ -112,7 +161,7 @@ Imagen y PDK fijados; carga de símbolos IHP en Xschem; punto de operación de u
 NMOS IHP con ngspice y OSDI; tecnología y PCells IHP en KLayout; presencia de
 reglas DRC/LVS y herramientas adicionales. Resultado en
 `build/environment-check/report.json`, logs junto al informe.
-No ejecuta DRC/LVS sobre un chip ni valida el watchdog: todavía no hay diseño.
+No ejecuta DRC/LVS sobre un chip ni valida el watchdog: la validación del diseño está en los bancos de `design/top/schematic/simulation/`.
 
 Ver [procedencia](docs/PROVENANCE.md) y [solución de problemas](docs/TROUBLESHOOTING.md).
 

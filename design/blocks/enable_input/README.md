@@ -1,7 +1,5 @@
-# Entradas EN/WDI y sincronización
+# EN_INPUT — historia (fuera de la versión 1.0)
 
-Carpeta reservada. Diseño, dimensiones y arquitectura por definir por el autor.
-
-- `schematic/`: esquemáticos y símbolos Xschem.
-- `layout/`: layouts editables y entregables físicos.
-- `char/`: configuración de caracterización, cuando exista un diseño.
+Entrada de habilitación EN de la arquitectura anterior (revisión 4). Se eliminó
+en la revisión 5: el watchdog vigila desde el POR, sin pin EN. Los archivos se
+conservan como historia; no se instancian en `wd_watchdog`.

@@ -1,41 +1,34 @@
-# wd_digital v3 — contador y control (revisión 5 del documento de diseño, 9/11/2026)
+# wd_digital — núcleo digital (versión 1.0)
 
-Versión vigente: **v3** (`*_v3.*`). Los archivos `*_v2.*` quedan como historia.
+`wd_digital` = `wd_control` (x1) + `counter17` (x2) + `sg13g2_tiehi` (x3, HI).
+Pines: `CLK POR_B SET1 SET0 WDI_EDGE RESET BOOT ACTIVE`.
 
 ## Comportamiento
-- **Activo desde el POR**, sin intervención del microcontrolador. No hay pin EN.
-- **Modo arranque** tras el POR y tras cada pulso: timeout de 102 401 T = 10,00 s hasta el primer WDI.
-- **Modo normal** (desde el primer WDI), timeout según los pines SET1 SET0, latcheados mientras POR_B = 0:
+- Activo desde el POR; **modo arranque** (timeout 102 400·T = 10 s) tras el POR,
+  tras cada pulso de reset y tras una pérdida de reloj, hasta el primer WDI.
+- **Modo normal**: timeout por SET1 SET0 = 00 → 1 s (T00), 01 → 0,1 s (T01),
+  10 → 10 s (T10), 11 → deshabilitado.
+- **Pulso de RESET** de 1025·T = 100 ms (termina con Q10); WDI se ignora.
+- **Configuración autorreparable**: los latches CFG releen SET1/SET0 en el POR
+  y en cada pulso de RESET; DIS exige 11 en los latches y en los pines.
 
-| SET1 SET0 | Timeout | Toma |
-|---|---|---|
-| 00 / sin conectar (pull-down) | 10 241 T = 1,000 s | Q13·Q11 |
-| 01 | 1025 T = 100,1 ms | Q10 |
-| 10 | 102 401 T = 10,00 s | Q16·Q15·Q12 |
-| 11 | deshabilitado | — |
-
-- Pulso de RESET: 1025 T = 100,1 ms (termina con Q10); WDI se ignora durante el pulso.
-- T = 97,656 µs (RT del oscilador con L = 170,7 µm).
-
-## Ecuaciones (= compuertas)
+## Ecuaciones de wd_control
 ```
-wd_bit:  D = nor2(xnor2(Q,CI), CLR)   CO = and2(Q,CI)   CI0 = tiehi      (17 bits)
-tomas:   T1 = and2(Q13,Q11)   T10 = and3(Q16,Q15,Q12)   T01 = Q10
-ctrl:    CFGi = dllrq_1(D=SETi, GATE_N=POR_B, RESET_B=HI)
-         DIS  = and2(CFG0,CFG1)          ACTIVE = nor2(DIS, RESET)
-         TON  = mux4(T1, T01, T10, LO; S0=CFG0, S1=CFG1)
-         TO   = mux2(A0=T10, A1=TON, S=NB)                 ; arranque -> 10 s
-         HIT  = and3(ACTIVE, TO, ~WDI_EDGE)
-         RS+  = a21o(RESET, Q10_N, HIT)
-         NB+  = and2(a21o(WDI_EDGE, ACTIVE, NB), RS_N)       ; BOOT = NB_N
-         CLR  = mux2(A0=or3(DIS, WDI_EDGE, HIT), A1=Q10, S=RESET)
+GN    = and2(POR_B, RS_N)                       ; x18
+CFGi  = dllrq_1(D = SETi, GATE_N = GN, RESET_B = HI)
+DIS   = and4(CFG0, SET0, SET1, CFG1)            ; x4
+ACTIVE= nor2(DIS, RESET)                        ; x14
+TON   = mux4(T00, T01, T10, T10; S0 = CFG0, S1 = CFG1)
+TO    = mux2(A0 = T10, A1 = TON, S = NB)        ; arranque -> 10 s
+HIT   = and3(ACTIVE, TO, ~WDI_EDGE)
+RESET+= a21o(RESET, Q10_N, HIT)                 ; x16 dfrbp_2 -> RESET_OUT del top
+NB+   = and2(a21o(WDI_EDGE, ACTIVE, NB), RS_N)  ; BOOT = ~NB
+CLR   = buf_2(mux2(A0 = or3(DIS, WDI_EDGE, HIT), A1 = T01, S = RESET))
 ```
-86 celdas sg13g2 tamaño 1 (19 FF + 2 latches), 1142 transistores.
-
-## Pines del símbolo
-`CLK POR_B SET0 SET1 WDI_EDGE RESET ACTIVE BOOT` (ACTIVE y BOOT: observación).
-Los pads SET0/SET1 son `sg13g2_IOPadIn` con pull-down rhigh ≈ 1 MΩ (W 0,5 / L ≈ 338 µm) del pad a IOVSS.
+wd_control: 17 celdas, 222 MOS. Núcleo completo: 105 celdas (19 FF + 2 latches), 1226 MOS.
 
 ## Verificación
-- `verilog/`: Icarus con los modelos de IHP (`PDK_ROOT=... sh run_icarus_v3.sh`): 36/36 chequeos con las constantes reales, 4 × 250 000 ciclos aleatorios idénticos a `model3.py`, 9/9 mutantes detectados (`mutantes3.log`).
-- `schematic/simulation/tb_wd_digital_v3_esc.spice`: nivel transistor, netlist idéntico salvo las tomas (DONE = T01 = Q1, T1 = Q3·Q2, T10 = Q5·Q4·Q2). Resultados en `resultados_v3_tt.log` y `resultados_v3_ss.log`.
+- Lógica del top (Icarus, `design/top/schematic/simulation/run_logic.sh`):
+  38/38 chequeos y 5 654 058 ciclos sin diferencias contra el modelo.
+- `upset_tb.v`: error forzado en los latches CFG, casos A y B: PASS.
+- ngspice tt/ss 9/9 con contador escalado (`wd_control_tb.sch`).

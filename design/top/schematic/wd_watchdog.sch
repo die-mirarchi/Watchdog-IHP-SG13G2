@@ -9,16 +9,20 @@ N 270 -30 320 -30 {lab=CLK}
 N 320 -30 370 -30 {lab=CLK}
 N 320 -30 320 -10 {lab=CLK}
 N 670 -30 680 -30 {lab=CLK_LOST}
-N 680 -30 680 130 {lab=CLK_LOST}
-N 680 130 700 130 {lab=CLK_LOST}
-N 270 170 310 170 {lab=RESET}
-N 310 170 700 170 {lab=RESET}
-N 310 150 310 170 {lab=RESET}
-N 820 150 840 150 {lab=RESET_OUT}
+N 680 -30 680 40 {lab=CLK_LOST}
+N 270 170 310 170 {lab=RESET_OUT}
+N 310 150 310 170 {lab=RESET_OUT}
 N -50 70 -30 70 {lab=CLK}
+N -90 50 -40 50 {lab=POR_RAW_N}
 N -40 50 -30 50 {lab=POR_RAW_N}
-N -50 50 -40 50 {lab=POR_RAW_N}
 N -40 20 -40 50 {lab=POR_RAW_N}
+N -370 50 -240 50 {lab=POR_DET_N}
+N -240 50 -240 30 {lab=POR_DET_N}
+N -240 30 -210 30 {lab=POR_DET_N}
+N -250 100 -230 100 {lab=CLK_OK}
+N -230 100 -230 70 {lab=CLK_OK}
+N -230 70 -210 70 {lab=CLK_OK}
+N -350 100 -330 100 {lab=CLK_LOST}
 N -400 190 -390 190 {lab=CLK}
 N -400 170 -390 170 {lab=POR_B}
 N -90 170 -90 190 {lab=#net1}
@@ -40,7 +44,7 @@ N -50 -90 -30 -90 {lab=VDD}
 N -50 -60 -30 -60 {lab=VSS}
 C {wd_oscillater.sym} 120 -30 0 0 {name=x1 VDD=VDD VSS=VSS}
 C {wd_reset_sync.sym} 120 60 0 0 {name=x2 VDD=VDD VSS=VSS}
-C {wd_por.sym} -200 50 0 0 {name=x3 VDD=VDD VSS=VSS}
+C {wd_por.sym} -520 50 0 0 {name=x3 VDD=VDD VSS=VSS}
 C {WDI_INPUT.sym} -240 190 0 0 {name=x4 VDD=VDD VSS=VSS}
 C {wd_digital.sym} 120 210 0 0 {name=x5 VDD=VDD VSS=VSS}
 C {lab_pin.sym} -50 70 0 0 {name=l2 sig_type=std_logic lab=CLK}
@@ -74,6 +78,9 @@ C {lab_pin.sym} 170 -180 0 0 {name=p103 sig_type=std_logic lab=RESET_OUT
 C {lab_pin.sym} 320 -10 0 1 {name=l1 sig_type=std_logic lab=CLK}
 C {wd_clkmon.sym} 520 -30 0 0 {name=x6 VDD=VDD VSS=VSS}
 C {lab_pin.sym} 680 40 0 1 {name=l18 sig_type=std_logic lab=CLK_LOST}
-C {sg13g2_or2_1.sym} 760 150 0 0 {name=x7 VDD=VDD VSS=VSS prefix=sg13g2_ }
-C {lab_pin.sym} 310 150 0 1 {name=l9 sig_type=std_logic lab=RESET}
-C {lab_pin.sym} 840 150 0 1 {name=l19 sig_type=std_logic lab=RESET_OUT}
+C {lab_pin.sym} 310 150 0 1 {name=l9 sig_type=std_logic lab=RESET_OUT}
+C {sg13g2_inv_1.sym} -290 100 0 0 {name=x8 VDD=VDD VSS=VSS prefix=sg13g2_ }
+C {sg13g2_and2_1.sym} -150 50 0 0 {name=x9 VDD=VDD VSS=VSS prefix=sg13g2_ }
+C {lab_pin.sym} -350 100 0 0 {name=l20 sig_type=std_logic lab=CLK_LOST}
+C {lab_pin.sym} -240 30 0 0 {name=l21 sig_type=std_logic lab=POR_DET_N}
+C {lab_pin.sym} -230 100 0 1 {name=l22 sig_type=std_logic lab=CLK_OK}

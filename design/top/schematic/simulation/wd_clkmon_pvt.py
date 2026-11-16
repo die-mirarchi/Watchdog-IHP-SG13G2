@@ -4,6 +4,9 @@
 # CLK ideal de T = 123 us (el periodo mas lento posible, peor caso de falsa deteccion):
 #   0-1,5 ms corre; 1,5-6 ms detenido en 0; 6-7,5 ms corre; 7,5-12 ms detenido en 1; 12-13 ms corre.
 # PASS: CLK_LOST = 0 con reloj, = 1 detenido, vuelve a 0 con el primer flanco; deteccion (desde el ultimo flanco) 185-2500 us.
+# Reintentos: tmax 0,5/0,3/0,7 us y, si los tres abortan (timestep too small en G con la pila de PMOS), reltol 1e-4.
+# Tamanos finales (16/11/2026): MP0 0,5/2; MP1/MP2 = 4 x 0,15/10 en serie (equivale a 0,15/40); MN0 30 x 0,15/10 en serie (L <= 10 um).
+# Resultado: 34/34 PASS, deteccion 230-2023 us, V_A/V_B con reloj 21-217 mV, 47-189 nA.
 # 34 casos: 5 MOS x -40/27/85 C x 1,08/1,32 V con MIM tipica + 4 esquinas de MIM. ~3 min con 4 procesos.
 import os,re
 import subprocess,itertools,json,sys
@@ -44,7 +47,7 @@ def run(a):
     last1=max(e for e in edges if e<1.5e-3); last2=max(e for e in edges if e<7.5e-3)
     pw=' '.join(f'{x:.9g} {y*v:.4g}' for x,y in [(0,0)]+pts)
     res={}
-    for tm in ['0.5u','0.3u','0.7u']:
+    for tm,rt in [('0.5u','1e-3'),('0.3u','1e-3'),('0.7u','1e-3'),('0.5u','1e-4')]:
         net=f'''* wd_clkmon PVT
 .lib {P}/libs.tech/ngspice/models/cornerMOSlv.lib {c}
 .lib {P}/libs.tech/ngspice/models/cornerCAP.lib {k}
@@ -55,7 +58,7 @@ VDD VDD 0 PWL(0 0 10u {v})
 VSS VSS 0 0
 VCK CLK 0 PWL({pw})
 x1 CLK CLK_LOST VDD VSS wd_clkmon
-.option method=gear maxord=2 reltol=1e-3
+.option method=gear maxord=2 reltol={rt}
 .control
 let vm={v}/2
 tran 0.5u 13m 0 {tm}
@@ -78,14 +81,14 @@ quit
 .endc
 .end
 '''
-        fn=f'clkmon_pvt/cm_{c}_{t}_{v}_{k}_{tm}.sp'; open(fn,'w').write(net)
+        fn=f'clkmon_pvt/cm_{c}_{t}_{v}_{k}_{tm}_{rt}.sp'; open(fn,'w').write(net)
         o=subprocess.run(['ngspice','-b',fn],capture_output=True,text=True).stdout
         L=[l for l in o.splitlines() if l.startswith('RES')]
         if L and len(L[0].split())==15:
             x=list(map(float,L[0].split()[1:]))
             fa=max(x[0:3]); vmax=max(x[3:7]); det0=(x[7]-last1)*1e6; det1=(x[8]-last2)*1e6
             ok = fa<v/2 and x[9]<v/2 and x[10]<v/2 and x[11]>v/2 and x[12]>v/2 and 185<det0<2500 and 185<det1<2500
-            return dict(c=c,t=t,v=v,k=k,tm=tm,vmax=round(vmax*1e3),det0=round(det0),det1=round(det1),I=round(-x[13]*1e9),fa=round(fa,3),ok=ok,stop=(l1,l2))
+            return dict(c=c,t=t,v=v,k=k,tm=tm,rt=rt,vmax=round(vmax*1e3),det0=round(det0),det1=round(det1),I=round(-x[13]*1e9),fa=round(fa,3),ok=ok,stop=(l1,l2))
     return dict(c=c,t=t,v=v,k=k,ok=None)
 cs=['mos_tt','mos_ss','mos_ff','mos_sf','mos_fs']
 jobs=[(c,t,v,'cap_typ') for c in cs for t in [-40,27,85] for v in [1.08,1.32]]

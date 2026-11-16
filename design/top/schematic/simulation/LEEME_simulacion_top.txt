@@ -1,3 +1,5 @@
+VERSION 1.0 (16/11/2026): funcional y validada en simulacion de esquematico; siguiente etapa: layout.
+
 Simulacion del top wd_watchdog (sin pads) -- como correr cada banco (desde esta carpeta, IIC-OSIC-TOOLS)
 =====================================================================================================
 0) En xschem: abrir ../wd_watchdog.sch y exportar el netlist a simulation/wd_watchdog.spice.
@@ -48,3 +50,25 @@ Bancos nuevos o actualizados (todos con: sh run_logic.sh wd_watchdog.spice <tb>)
                               colgado; B = 10 -> 01 con firmware sano. El netlist anterior falla los dos.
      wd_clkmon_beh.v          modelo conductual de wd_clkmon (CLK_LOST tras 0,86 ms sin flancos)
   A nivel transistor:  python3 wd_clkmon_pvt.py   -> wd_clkmon_pvt.json, VEREDICTO (34 casos, ~3 min)
+
+Cambio del 16/11/2026: la perdida de reloj solo reinicia el watchdog
+---------------------------------------------------------------------
+- top: sin la or2 x7. RESET_OUT = RESET de wd_digital (CLK_LOST ya no llega a la salida).
+  wd_por sale como POR_DET_N; x8 inv_1 (CLK_OK = !CLK_LOST) y x9 and2_1: POR_RAW_N = POR_DET_N & CLK_OK -> wd_reset_sync.
+  Sin reloj: POR_B = 0 asincronico (todo el watchdog en reset, RESET_OUT = 0); al volver el reloj POR_B sube a los
+  34 flancos y el watchdog arranca en modo arranque (10 s), como despues de un encendido.
+  Un pulso de reset en curso se corta si el reloj se cae (dura lo que llevaba + la deteccion).
+- Reexportar el netlist (simulation/wd_watchdog.spice) desde xschem antes de correr los bancos.
+- wd_watchdog_clkmon_tb.v reescrito (5 casos, VEREDICTO); wd_watchdog_logic_tb.v: g_out = RESET sin CLK_LOST.
+  Verificado (Icarus, wd_clkmon conductual): clkmon_tb PASS (el netlist anterior FALLA), logic_tb 38/38 + 5 654 058 ciclos,
+  upset_tb A y B PASS.
+
+wd_clkmon, tamanos finales (16/11/2026)
+---------------------------------------
+- MN0[29:0]: 30 x 0,15/10 en SERIE (etiquetas G,NS[28:0] / NS[28:0],VSS; L <= 10 um para todo MOS). MP0 0,5/2.
+  MP1[3:0] y MP2[3:0]: pila de 4 x 0,15/10 (equivale a 0,15/40 sin pasar L = 10 um).
+- be999bb tenia un solo MN0 0,13/10 (W < 0,15 minimo): I_REF de uA, CLK_LOST con reloj -> 0/34.
+  Con MP0 0,5/0,5 y MP1/MP2 0,15/10 (sin pila): 31/34 (ff/-40 detecta en 110-136 us); MP0 10/10: 31/34.
+- python3 wd_clkmon_pvt.py -> 34/34 PASS: deteccion 230-2023 us, V_A/V_B con reloj 21-217 mV, 47-189 nA (con MN0 15 x 0,15/20 daba 227-1958 us).
+  ss/85/1,32 aborta con reltol 1e-3 (timestep too small en G, con los 3 tmax) y pasa con reltol 1e-4: el script reintenta solo.
+- Reexportar design/blocks/clkmon/schematic/simulation/wd_clkmon.spice (el de be999bb quedo viejo).

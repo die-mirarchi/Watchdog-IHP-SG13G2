@@ -47,7 +47,7 @@ module tb;
       g_nb  <= (g_nb | (g_edge & g_act)) & ~g_rs;
       g_cnt <= g_clr ? 17'd0 : g_cnt + 1'b1;
     end
-  wire g_out = (g_porb & g_rs) | dut.CLK_LOST;   // RESET_OUT = RESET + CLK_LOST
+  wire g_out = g_porb & g_rs;   // RESET_OUT = RESET (CLK_LOST solo reinicia el watchdog)
 
   integer nmis = 0, ncmp = 0; reg cmp_on = 0;
   always @(negedge clk) if (cmp_on) begin
