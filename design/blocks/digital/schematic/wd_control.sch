@@ -5,20 +5,15 @@ V {}
 S {}
 F {}
 E {}
-T {Config. autorreparable (13/11/2026)} -420 -55 0 0 0.3 0.3 {}
-T {GN = POR_B & RS_N: CFG relee SET1/SET0} -420 -28 0 0 0.22 0.22 {}
-T {en el POR y en cada pulso de RESET} -420 -10 0 0 0.22 0.22 {}
-T {DIS = CFG0 & SET0 & SET1 & CFG1} 100 135 0 0 0.22 0.22 {}
-T {(un error en CFG no deshabilita)} 100 155 0 0 0.22 0.22 {}
 T {A3 = T10 (antes LO)} 300 -60 0 0 0.2 0.2 {}
 N 40 0 100 0 {lab=CFG0}
 N 100 0 140 0 {lab=CFG0}
 N 100 0 100 15 {lab=CFG0}
-N 140 0 140 -20 {lab=CFG0}
+N 140 -20 140 0 {lab=CFG0}
 N 140 -20 170 -20 {lab=CFG0}
 N 40 90 100 90 {lab=CFG1}
 N 100 90 140 90 {lab=CFG1}
-N 100 90 100 75 {lab=CFG1}
+N 100 75 100 90 {lab=CFG1}
 N 140 90 140 100 {lab=CFG1}
 N 140 100 170 100 {lab=CFG1}
 N 150 20 170 20 {lab=SET0}

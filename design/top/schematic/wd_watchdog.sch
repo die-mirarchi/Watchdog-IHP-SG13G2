@@ -5,18 +5,15 @@ V {}
 S {}
 F {}
 E {}
-T {wd_clkmon: si CLK se detiene (o no arranca) CLK_LOST = 1} 380 -110 0 0 0.25 0.25 {}
-T {RESET_OUT = RESET + CLK_LOST (fuera de POR_B): sin reloj el uC queda en reset} 560 230 0 0 0.25 0.25 {}
 N 270 -30 320 -30 {lab=CLK}
 N 320 -30 370 -30 {lab=CLK}
 N 320 -30 320 -10 {lab=CLK}
 N 670 -30 680 -30 {lab=CLK_LOST}
-N 680 -30 680 40 {lab=CLK_LOST}
-N 680 40 680 130 {lab=CLK_LOST}
+N 680 -30 680 130 {lab=CLK_LOST}
 N 680 130 700 130 {lab=CLK_LOST}
 N 270 170 310 170 {lab=RESET}
 N 310 170 700 170 {lab=RESET}
-N 310 170 310 150 {lab=RESET}
+N 310 150 310 170 {lab=RESET}
 N 820 150 840 150 {lab=RESET_OUT}
 N -50 70 -30 70 {lab=CLK}
 N -40 50 -30 50 {lab=POR_RAW_N}

@@ -9,7 +9,6 @@ N 160 -50 160 -30 {lab=WDI_META}
 N 160 -30 200 -30 {lab=WDI_META}
 N 380 -30 430 -30 {lab=WDI_SYNC}
 N 610 -30 630 -30 {lab=HIST_N}
-N 630 -50 630 -30 {lab=HIST_N}
 N 380 -30 380 30 {lab=WDI_SYNC}
 N 380 30 630 30 {lab=WDI_SYNC}
 N 630 -10 630 30 {lab=WDI_SYNC}
@@ -18,6 +17,8 @@ N 150 -50 160 -50 {lab=WDI_META}
 N -20 -140 -0 -140 {lab=CLK}
 N -20 -170 -0 -170 {lab=POR_B}
 N 380 -50 380 -30 {lab=WDI_SYNC}
+N 630 -80 630 -30 {lab=HIST_N}
+N 610 -110 610 -50 {lab=HIST}
 C {sg13g2_dfrbpq_1.sym} 60 -30 0 0 {name=x1 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {sg13g2_dfrbpq_1.sym} 290 -30 0 0 {name=x2 VDD=VDD VSS=VSS prefix=sg13g2_ }
 C {sg13g2_and2_1.sym} 690 -30 0 0 {name=x4 VDD=VDD VSS=VSS prefix=sg13g2_ }
@@ -37,5 +38,5 @@ C {lab_pin.sym} 0 -140 0 1 {name=p12 sig_type=std_logic lab=CLK}
 C {ipin.sym} -20 -140 0 0 {name=p13 lab=CLK}
 C {lab_pin.sym} 160 -30 0 0 {name=lbl_wdi_meta sig_type=std_logic lab=WDI_META}
 C {lab_pin.sym} 380 30 0 0 {name=lbl_wdi_sync sig_type=std_logic lab=WDI_SYNC}
-C {lab_pin.sym} 630 -30 0 0 {name=lbl_hist_n sig_type=std_logic lab=HIST_N}
-C {lab_pin.sym} 610 -50 0 1 {name=lbl_hist sig_type=std_logic lab=HIST}
+C {lab_pin.sym} 630 -80 0 1 {name=lbl_hist_n sig_type=std_logic lab=HIST_N}
+C {lab_pin.sym} 610 -110 0 1 {name=lbl_hist sig_type=std_logic lab=HIST}
