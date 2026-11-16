@@ -95,9 +95,9 @@ model=sg13_lv_pmos
 spiceprefix=X
 }
 C {lab_pin.sym} 60 -120 0 0 {name=l5 sig_type=std_logic lab=G}
-C {sg13g2_pr/sg13_lv_nmos.sym} 100 40 0 0 {name=MN0[14:0]
-l=20u
-w=0.15u
+C {sg13g2_pr/sg13_lv_nmos.sym} 100 40 0 0 {name=MN0
+l=10u
+w=0.13u
 ng=1
 m=1
 mm_ok=1
