@@ -81,7 +81,7 @@ C {lab_pin.sym} -160 -300 0 0 {name=l2 sig_type=std_logic lab=CLK_LOST}
 C {lab_pin.sym} 20 -200 0 0 {name=l3 sig_type=std_logic lab=VDD}
 C {lab_pin.sym} 20 100 0 0 {name=l4 sig_type=std_logic lab=VSS}
 C {sg13g2_pr/sg13_lv_pmos.sym} 100 -120 0 0 {name=MP0
-l=2u
+l=0.5u
 w=0.5u
 ng=1
 m=1
@@ -103,7 +103,7 @@ C {lab_pin.sym} 120 -10 0 1 {name=l6 sig_type=std_logic lab=G,NS[13:0]}
 C {lab_pin.sym} 120 80 0 0 {name=l7 sig_type=std_logic lab=NS[13:0],VSS}
 C {lab_pin.sym} 60 40 0 0 {name=l8 sig_type=std_logic lab=VDD}
 C {sg13g2_pr/sg13_lv_pmos.sym} 300 -120 0 0 {name=MP1
-l=40u
+l=10u
 w=0.15u
 ng=1
 m=1
@@ -131,7 +131,7 @@ spiceprefix=X
 C {lab_pin.sym} 440 20 0 0 {name=l10 sig_type=std_logic lab=CLKP}
 C {lab_pin.sym} 540 -40 0 1 {name=l11 sig_type=std_logic lab=A}
 C {sg13g2_pr/sg13_lv_pmos.sym} 640 -120 0 0 {name=MP2
-l=40u
+l=10u
 w=0.15u
 ng=1
 m=1

@@ -115,7 +115,7 @@ x3 HI VDD VSS sg13g2_tiehi
 .subckt wd_clkmon CLK CLK_LOST VDD VSS
 *.ipin CLK
 *.opin CLK_LOST
-XMP0 G G VDD VDD sg13_lv_pmos w=0.5u l=2u ng=1 m=1 mm_ok=1
+XMP0 G G VDD VDD sg13_lv_pmos w=0.5u l=0.5u ng=1 m=1 mm_ok=1
 XMN0[14] G VDD NS[13] VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
 XMN0[13] NS[13] VDD NS[12] VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
 XMN0[12] NS[12] VDD NS[11] VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
@@ -131,10 +131,10 @@ XMN0[3] NS[3] VDD NS[2] VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
 XMN0[2] NS[2] VDD NS[1] VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
 XMN0[1] NS[1] VDD NS[0] VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
 XMN0[0] NS[0] VDD VSS VSS sg13_lv_nmos w=0.15u l=20u ng=1 m=1 mm_ok=1
-XMP1 A G VDD VDD sg13_lv_pmos w=0.15u l=40u ng=1 m=1 mm_ok=1
+XMP1 A G VDD VDD sg13_lv_pmos w=0.15u l=10u ng=1 m=1 mm_ok=1
 XCA A VSS cap_cmim w=28e-6 l=28e-6 m=1 mm_ok=1
 XMN1 A CLKP VSS VSS sg13_lv_nmos w=0.5u l=0.13u ng=1 m=1 mm_ok=1
-XMP2 B G VDD VDD sg13_lv_pmos w=0.15u l=40u ng=1 m=1 mm_ok=1
+XMP2 B G VDD VDD sg13_lv_pmos w=0.15u l=10u ng=1 m=1 mm_ok=1
 XCB B VSS cap_cmim w=28e-6 l=28e-6 m=1 mm_ok=1
 XMN2 B CLKN VSS VSS sg13_lv_nmos w=0.5u l=0.13u ng=1 m=1 mm_ok=1
 xi1 CLKN CLK VDD VSS sg13g2_inv_1
