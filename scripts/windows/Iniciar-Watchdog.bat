@@ -5,7 +5,8 @@ set "WSL_EXE=%SystemRoot%\System32\wsl.exe"
 if exist "%SystemRoot%\Sysnative\wsl.exe" set "WSL_EXE=%SystemRoot%\Sysnative\wsl.exe"
 set "WSL_DISTRO=Ubuntu-24.04"
 set "LINUX_USER=eamtastudent"
-set "STARTDIR=/home/eamtastudent/tesis/Watchdog-IHP-SG13G2"
+set "STARTDIR=/mnt/d/Watchdog-IHP_Tesis/Watchdog-IHP-SG13G2"
+set "PDK_DIR=/home/eamtastudent/tesis/Watchdog-IHP-SG13G2/.local/pdks/IHP-Open-PDK"
 set "ACTION=shell"
 if /i "%~1"=="--check" set "ACTION=check"
 
@@ -26,7 +27,7 @@ echo Para abrir KLayout:
 echo   klayout -e ^&
 echo.
 
-"%WSL_EXE%" -d %WSL_DISTRO% -u %LINUX_USER% --cd %STARTDIR% -- bash scripts/eda.sh %ACTION%
+"%WSL_EXE%" -d %WSL_DISTRO% -u %LINUX_USER% --cd %STARTDIR% -- env WD_PDK=%PDK_DIR% bash scripts/eda.sh %ACTION%
 set "RESULT=%ERRORLEVEL%"
 
 if /i "%~1"=="--check" exit /b %RESULT%

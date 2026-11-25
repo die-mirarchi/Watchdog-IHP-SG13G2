@@ -6,7 +6,8 @@ source "$ROOT/tools-config/toolchain.lock"
 command -v podman >/dev/null || { echo 'Ejecutar bash setup.sh primero.' >&2; exit 1; }
 podman image exists "$OSIC_IMAGE" || { echo 'Falta la imagen. Ejecutar bash setup.sh.' >&2; exit 1; }
 mkdir -p "$ROOT/.local/home" "$ROOT/build" "$ROOT/results"
-PDK_SOURCE="$ROOT/.local/pdks/IHP-Open-PDK"
+# WD_PDK: usar el PDK ya instalado en otra copia del repo (p. ej. la de WSL) en vez de uno local.
+PDK_SOURCE="${WD_PDK:-$ROOT/.local/pdks/IHP-Open-PDK}"
 [[ -d "$PDK_SOURCE/ihp-sg13g2" ]] || { echo 'Falta el PDK local. Ejecutar bash setup.sh.' >&2; exit 1; }
 [[ $(git -C "$PDK_SOURCE" rev-parse HEAD) == "$IHP_PDK_COMMIT" ]] || { echo 'Version del PDK distinta del lock. Ejecutar bash setup.sh.' >&2; exit 1; }
 pdk_mode=ro
@@ -18,12 +19,6 @@ args=(run --pull=never --rm --init --hostname "$(hostname)" --userns=keep-id --u
     --env HOME=/workspace/.local/home --env PDK=ihp-sg13g2
     --env PDK_ROOT=/foss/pdks --env THESIS_IMAGE="$OSIC_IMAGE"
     --entrypoint /bin/bash)
-# Git dentro del contenedor: claves SSH e identidad de Ubuntu (solo lectura) y el clon de Windows
-# en la misma ruta que en Ubuntu, para que el remoto "windows" (git traer) funcione igual.
-[[ -d $HOME/.ssh ]] && args+=(--volume "$HOME/.ssh:/workspace/.local/home/.ssh:ro")
-[[ -f $HOME/.gitconfig ]] && args+=(--volume "$HOME/.gitconfig:/workspace/.local/home/.gitconfig:ro")
-WD_WIN_REPO=${WD_WIN_REPO:-/mnt/d/Watchdog-IHP_Tesis/Watchdog-IHP-SG13G2}
-[[ -d $WD_WIN_REPO/.git ]] && args+=(--volume "$WD_WIN_REPO:$WD_WIN_REPO:rw")
 [[ -t 0 && -t 1 ]] && args+=(-it)
 if [[ -n ${DISPLAY:-} && -d /tmp/.X11-unix ]]; then
     args+=(--env "DISPLAY=$DISPLAY" --volume /tmp/.X11-unix:/tmp/.X11-unix:ro)
