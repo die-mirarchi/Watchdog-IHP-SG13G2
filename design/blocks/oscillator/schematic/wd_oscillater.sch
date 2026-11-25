@@ -107,11 +107,11 @@ C {lab_pin.sym} 730 -160 0 1 {name=p8 sig_type=std_logic lab=CLK
 }
 C {sg13g2_pr/rppd.sym} 820 -60 1 0 {name=R4
 w=1e-6
-l=661e-6
+l=104.70e-6
 model=rppd
 body=VSS
 spiceprefix=X
-b=15
+b=99
  m=1
   mm_ok=1
 value="expr_eng(  ( 70.0e-6 / @w + 260.0 * ( (@b + 1)* @l + ( 1.081*( @w + 6.0e-9 ) + 0.18e-6 )*@b ) / ( @w + 6.0e-9 ) ) / @m  )"

@@ -30,7 +30,7 @@ x4 NCHG SET CHG VDD VSS sg13g2_nor2_1
 x5 CHG RST NCHG VDD VSS sg13g2_nor2_1
 x6 DRIVE CHG VDD VSS sg13g2_buf_1
 x7 CLK CHG VDD VSS sg13g2_buf_4
-XR4 VC DRIVE VSS rppd w=1e-6 l=661e-6 m=1 b=15 mm_ok=1
+XR4 VC DRIVE VSS rppd w=1e-6 l=104.70e-6 m=1 b=99 mm_ok=1
 XC1 VH VSS cap_cmim w=20.0e-6 l=20.0e-6 m=1 mm_ok=1
 XC3 VL VSS cap_cmim w=20.0e-6 l=20.0e-6 m=1 mm_ok=1
 XC4 VC VSS cap_cmim w=64.0e-6 l=64.0e-6 m=4 mm_ok=1
